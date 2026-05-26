@@ -1,20 +1,70 @@
-<section class="hero" aria-labelledby="hero-title">
-  <div class="hero__bg" aria-hidden="true"></div>
+<section
+  class="hero"
+  aria-roledescription="carousel"
+  aria-label="Ats Racing tanıtım"
+  (mouseenter)="setPaused(true)"
+  (mouseleave)="setPaused(false)"
+  (focusin)="setPaused(true)"
+  (focusout)="setPaused(false)"
+>
+  @for (slide of slides; track slide.line1; let i = $index) {
+    <div
+      class="hero__slide"
+      [class.is-active]="active() === i"
+      [attr.aria-hidden]="active() !== i"
+      [style.background-image]="'url(' + slide.image + ')'"
+    ></div>
+  }
   <div class="hero__overlay" aria-hidden="true"></div>
 
   <div class="hero__inner">
-    <h1 id="hero-title" class="hero__title">
-      <span class="hero__line hero__line--1">Performans tutkunlarının</span>
-      <span class="hero__line hero__line--2">İstanbul'daki adresi</span>
-    </h1>
-
-    <p class="hero__lead">
-      Adipiscing elit, sed do eiusmod tempor. ECU yazılımı, performans modifiyesi ve
-      profesyonel detayl bakım — 12 yıllık deneyim, ölçülebilir sonuçlar.
-    </p>
+    @for (slide of slides; track slide.line1; let i = $index) {
+      <article
+        class="hero__panel"
+        [class.is-active]="active() === i"
+        [attr.aria-hidden]="active() !== i"
+      >
+        <h1 class="hero__title">
+          <span class="hero__line hero__line--1">{{ slide.line1 }}</span>
+          <span class="hero__line hero__line--2">{{ slide.line2 }}</span>
+        </h1>
+        <p class="hero__lead">{{ slide.lead }}</p>
+      </article>
+    }
 
     <a class="hero__scroll" href="#home-stats" aria-label="Aşağı kaydır">
       <i class="pi pi-arrow-down"></i>
     </a>
+
+    <div class="hero__nav" aria-label="Slayt kontrolleri">
+      <button type="button" class="hero__nav-btn" (click)="prev()" aria-label="Önceki slayt">
+        <i class="pi pi-arrow-left"></i>
+      </button>
+
+      <ul class="hero__dots" role="tablist">
+        @for (slide of slides; track slide.line1; let i = $index) {
+          <li>
+            <button
+              type="button"
+              role="tab"
+              [class.is-active]="active() === i"
+              [attr.aria-selected]="active() === i"
+              [attr.aria-label]="'Slayt ' + (i + 1)"
+              (click)="go(i)"
+            ></button>
+          </li>
+        }
+      </ul>
+
+      <button type="button" class="hero__nav-btn" (click)="next()" aria-label="Sonraki slayt">
+        <i class="pi pi-arrow-right"></i>
+      </button>
+
+      <span class="hero__counter" aria-hidden="true">
+        <span class="hero__counter-curr">{{ (active() + 1).toString().padStart(2, '0') }}</span>
+        <span class="hero__counter-sep">/</span>
+        <span class="hero__counter-tot">{{ slides.length.toString().padStart(2, '0') }}</span>
+      </span>
+    </div>
   </div>
 </section>
