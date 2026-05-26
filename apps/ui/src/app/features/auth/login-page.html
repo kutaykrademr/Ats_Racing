@@ -1,0 +1,77 @@
+<section class="auth">
+  <div class="auth__visual" aria-hidden="true">
+    <div class="auth__visual-overlay"></div>
+    <div class="auth__visual-copy">
+      <p class="auth__visual-eyebrow">Ats Racing</p>
+      <h2>Aracın için doğru ekibe tek tıkla ulaş</h2>
+      <p>
+        Hesabınla siparişlerini, randevularını ve dyno raporlarını tek panelden yönet.
+      </p>
+    </div>
+  </div>
+
+  <div class="auth__panel">
+    <div class="auth__panel-inner">
+      <header class="auth__head">
+        <p class="auth__eyebrow">Hesabım</p>
+        <h1>Giriş Yap</h1>
+        <p class="auth__lead">
+          Hesabın yok mu?
+          <a routerLink="/contact" class="auth__link">Bize ulaş</a>, sana açalım.
+        </p>
+      </header>
+
+      <form class="auth__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="auth__field" [class.is-invalid]="hasError('email')">
+          <label for="login-email">E-posta</label>
+          <input
+            id="login-email"
+            pInputText
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+          />
+          @if (errorOf('email'); as msg) { <small role="alert">{{ msg }}</small> }
+        </div>
+
+        <div class="auth__field" [class.is-invalid]="hasError('password')">
+          <label for="login-password">Şifre</label>
+          <p-password
+            inputId="login-password"
+            formControlName="password"
+            [toggleMask]="true"
+            [feedback]="false"
+            styleClass="auth__password"
+            inputStyleClass="auth__password-input"
+            autocomplete="current-password"
+          ></p-password>
+          @if (errorOf('password'); as msg) { <small role="alert">{{ msg }}</small> }
+        </div>
+
+        <div class="auth__row">
+          <span class="auth__remember">
+            <p-checkbox inputId="login-remember" formControlName="remember" [binary]="true"></p-checkbox>
+            <label for="login-remember">Beni hatırla</label>
+          </span>
+          <a href="#" class="auth__link">Şifremi unuttum</a>
+        </div>
+
+        <p-button
+          type="submit"
+          [label]="submitting() ? 'Giriş yapılıyor…' : 'Giriş Yap'"
+          [disabled]="submitting()"
+          styleClass="w-full"
+        ></p-button>
+
+        @if (serverError(); as err) {
+          <p class="auth__err" role="alert"><i class="pi pi-exclamation-triangle"></i> {{ err }}</p>
+        }
+
+        <p class="auth__legal">
+          Devam ederek <a href="#" class="auth__link">Kullanım Şartları</a> ve
+          <a href="#" class="auth__link">Gizlilik Politikası</a>’nı kabul etmiş olursun.
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
