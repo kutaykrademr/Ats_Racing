@@ -1,0 +1,43 @@
+@use './tokens' as *;
+
+// Sharp, uppercase, crimson primary button matching the brand reference.
+.p-button {
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  font-family: $font-body;
+  padding: 0.85rem 2.5rem;
+  background: $color-accent;
+  border-color: $color-accent;
+  color: $color-text-on-dark;
+  transition: background-color 200ms ease, border-color 200ms ease;
+
+  &:hover,
+  &:focus-visible {
+    background: $color-accent-hover;
+    border-color: $color-accent-hover;
+  }
+
+  &.p-button-outlined {
+    background: transparent;
+    color: $color-text-on-dark;
+    border-color: $color-text-on-dark;
+
+    &:hover {
+      background: $color-text-on-dark;
+      color: $color-bg;
+    }
+  }
+
+  &.p-button-sm {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.8125rem;
+  }
+}
+
+.p-inputtext,
+.p-password input {
+  border-radius: 0;
+  font-family: $font-body;
+}
