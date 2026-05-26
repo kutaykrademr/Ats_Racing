@@ -1,0 +1,125 @@
+.cform {
+  background: #ffffff;
+  border: 1px solid #ececec;
+  padding: 2rem;
+
+  @media (min-width: 768px) {
+    padding: 3rem;
+  }
+}
+
+.cform__head {
+  margin-bottom: 2rem;
+}
+
+.cform__eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #ea0a0b;
+  margin: 0 0 0.75rem;
+}
+
+.cform__title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 1.875rem;
+  color: #18171a;
+  margin: 0 0 0.75rem;
+  line-height: 1.1;
+}
+
+.cform__lead {
+  margin: 0;
+  color: #615f5c;
+}
+
+.cform__row {
+  display: grid;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.cform__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  & + & { margin-top: 0; }
+
+  label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #18171a;
+    font-weight: 600;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    color: #18171a;
+    padding: 0.85rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9375rem;
+    border-radius: 0;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+
+    &:focus {
+      outline: none;
+      border-color: #ea0a0b;
+      box-shadow: 0 0 0 3px rgba(234, 10, 11, 0.15);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  small {
+    color: #ea0a0b;
+    font-size: 0.8125rem;
+  }
+
+  &.is-invalid input,
+  &.is-invalid textarea {
+    border-color: #ea0a0b;
+  }
+}
+
+.cform__actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.cform__ok,
+.cform__err {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cform__ok {
+  color: #1b8e3b;
+}
+
+.cform__err {
+  color: #ea0a0b;
+}

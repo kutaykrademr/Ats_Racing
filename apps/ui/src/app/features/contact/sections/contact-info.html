@@ -1,0 +1,33 @@
+<aside class="cinfo">
+  <h2 class="cinfo__title">İletişim Bilgileri</h2>
+  <p class="cinfo__lead">Doğrudan iletişim mi tercih edersin? Kanallarımızı kullanabilirsin.</p>
+
+  <ul class="cinfo__list" role="list">
+    @for (item of items; track item.label) {
+      <li class="cinfo__item">
+        <span class="cinfo__icon" aria-hidden="true"><i [class]="item.icon"></i></span>
+        <div>
+          <p class="cinfo__label">{{ item.label }}</p>
+          @if (item.href) {
+            <a class="cinfo__value" [href]="item.href">{{ item.value }}</a>
+          } @else {
+            <p class="cinfo__value">{{ item.value }}</p>
+          }
+        </div>
+      </li>
+    }
+  </ul>
+
+  <div class="cinfo__socials">
+    <p class="cinfo__label">Takip Et</p>
+    <ul role="list">
+      @for (s of socials; track s.label) {
+        <li>
+          <a [href]="s.href" [attr.aria-label]="s.label" rel="noopener" target="_blank">
+            <i [class]="s.icon"></i>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</aside>
