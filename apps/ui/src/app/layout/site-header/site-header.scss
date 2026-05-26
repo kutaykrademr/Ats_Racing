@@ -1,0 +1,65 @@
+@use '../../../styles/tokens' as *;
+
+:host {
+  display: contents;
+}
+
+.site-header {
+  background: transparent;
+  color: $color-text-on-dark;
+
+  &.is-scrolled {
+    background: rgba($color-bg, 0.92);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  }
+}
+
+.brand {
+  font-family: $font-display;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $color-text-on-dark;
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: $color-accent;
+  color: $color-text-on-dark;
+  font-size: 1.25rem;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+}
+
+.nav-link {
+  font-family: $font-body;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: $color-text-on-dark;
+  transition: color 200ms ease;
+  position: relative;
+
+  &:hover {
+    color: $color-accent;
+  }
+
+  &.is-active {
+    color: $color-accent;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-accent;
+    outline-offset: 4px;
+  }
+}
+
+.mobile-panel {
+  background: $color-bg;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}

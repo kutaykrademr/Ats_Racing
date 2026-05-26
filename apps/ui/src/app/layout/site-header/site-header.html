@@ -1,0 +1,76 @@
+<header
+  class="site-header fixed inset-x-0 top-0 z-50 transition-colors duration-300"
+  [class.is-scrolled]="scrolled()"
+>
+  <div class="container-page flex h-[88px] items-center justify-between gap-6">
+    <a routerLink="/" class="brand inline-flex items-center gap-2" (click)="closeMobile()">
+      <span class="brand-mark" aria-hidden="true">A</span>
+      <span class="brand-name">Ats Racing</span>
+    </a>
+
+    <nav class="hidden lg:block" aria-label="Ana menü">
+      <ul class="flex items-center gap-8">
+        @for (item of nav; track item.path) {
+          <li>
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+              class="nav-link"
+            >
+              {{ item.label }}
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a
+        routerLink="/login"
+        class="hidden md:inline-flex nav-link tracking-cta uppercase text-sm"
+      >
+        Giriş Yap
+      </a>
+      <p-button
+        label="Teklif Al"
+        styleClass="p-button-sm"
+        routerLink="/contact"
+        class="hidden md:inline-flex"
+      ></p-button>
+
+      <button
+        type="button"
+        class="lg:hidden inline-flex h-10 w-10 items-center justify-center text-brand-text-on-dark"
+        [attr.aria-expanded]="mobileOpen()"
+        aria-label="Menüyü aç/kapat"
+        (click)="toggleMobile()"
+      >
+        <i [class]="mobileOpen() ? 'pi pi-times' : 'pi pi-bars'" class="text-xl"></i>
+      </button>
+    </div>
+  </div>
+
+  @if (mobileOpen()) {
+    <div class="mobile-panel lg:hidden">
+      <ul class="container-page flex flex-col gap-1 py-4">
+        @for (item of nav; track item.path) {
+          <li>
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+              class="block py-3 nav-link"
+              (click)="closeMobile()"
+            >
+              {{ item.label }}
+            </a>
+          </li>
+        }
+        <li class="pt-2">
+          <a routerLink="/login" class="block py-3 nav-link" (click)="closeMobile()">Giriş Yap</a>
+        </li>
+      </ul>
+    </div>
+  }
+</header>

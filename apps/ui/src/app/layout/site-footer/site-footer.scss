@@ -1,0 +1,74 @@
+@use '../../../styles/tokens' as *;
+
+:host {
+  display: contents;
+}
+
+.site-footer {
+  background: $color-bg;
+  color: $color-text-on-dark;
+}
+
+.brand {
+  font-family: $font-display;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: $color-accent;
+  color: $color-text-on-dark;
+  font-size: 1.25rem;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+}
+
+.footer-title {
+  font-family: $font-display;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: $color-text-on-dark;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 200ms ease;
+
+  &:hover {
+    color: $color-accent;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-accent;
+    outline-offset: 4px;
+  }
+}
+
+.social {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: $color-text-on-dark;
+  transition: background-color 200ms ease, border-color 200ms ease;
+
+  &:hover {
+    background: $color-accent;
+    border-color: $color-accent;
+  }
+}
+
+.footer-legal {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}

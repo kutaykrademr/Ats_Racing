@@ -1,14 +1,22 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
+import { TitleStrategy, provideRouter, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeng/themes/aura';
+import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
+import { BrandTitleStrategy } from './core/title-strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(appRoutes),
+    provideRouter(
+      appRoutes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'top',
+        anchorScrolling: 'enabled',
+      }),
+    ),
+    { provide: TitleStrategy, useClass: BrandTitleStrategy },
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {

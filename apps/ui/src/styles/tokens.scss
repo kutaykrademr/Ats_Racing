@@ -1,0 +1,35 @@
+// Mirror of Tailwind theme tokens for SCSS consumers.
+// Update both files together if a token changes.
+
+$color-bg:           #0D0C0F;
+$color-bg-alt:       #18171A;
+$color-bg-light:     #F4F4F4;
+$color-surface:      #FFFFFF;
+$color-border:       #D9D9D9;
+
+$color-text:         #615F5C;
+$color-text-strong:  #18171A;
+$color-text-muted:   #949087;
+$color-text-on-dark: #FFFFFF;
+
+$color-accent:       #EA0A0B;
+$color-accent-hover: #FF2020;
+
+$font-display: '"Barlow Condensed"', system-ui, sans-serif;
+$font-body:    '"DM Sans"', system-ui, sans-serif;
+
+$container-max: 1440px;
+$container-px:  70px;
+$section-py-sm: 64px;
+$section-py-lg: 96px;
+
+$header-height: 88px;
+
+:root {
+  --brand-bg: #{$color-bg};
+  --brand-bg-alt: #{$color-bg-alt};
+  --brand-accent: #{$color-accent};
+  --brand-accent-hover: #{$color-accent-hover};
+  --brand-text: #{$color-text};
+  --brand-text-on-dark: #{$color-text-on-dark};
+}
