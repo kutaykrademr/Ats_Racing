@@ -1,46 +1,52 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { PageHero } from '../../shared/ui/page-hero/page-hero';
 import { ContactForm } from './sections/contact-form';
+import { ContactHero } from './sections/contact-hero';
+import { ContactHoursFaq } from './sections/hours-faq';
 import { ContactInfo } from './sections/contact-info';
 import { ContactMap } from './sections/contact-map';
 
 @Component({
   selector: 'app-contact-page',
   standalone: true,
-  imports: [PageHero, ContactForm, ContactInfo, ContactMap],
+  imports: [ContactHero, ContactForm, ContactInfo, ContactHoursFaq, ContactMap],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-page-hero
-      eyebrow="İletişim"
-      title="Bize Ulaşın"
-      lead="Sorularını, projelerini ya da randevu taleplerini bize iletmek için bir kaç saniye yeterli."
-      image="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=2400&q=80"
-    ></app-page-hero>
+    <app-contact-hero></app-contact-hero>
 
-    <section class="section">
-      <div class="container-page contact-grid">
-        <app-contact-form class="contact-grid__form"></app-contact-form>
-        <app-contact-info class="contact-grid__info"></app-contact-info>
+    <section class="cwrap">
+      <div class="cwrap__inner">
+        <app-contact-form class="cwrap__form"></app-contact-form>
+        <app-contact-info class="cwrap__info"></app-contact-info>
       </div>
     </section>
 
+    <app-contact-hours-faq></app-contact-hours-faq>
     <app-contact-map></app-contact-map>
   `,
   styles: [
     `
-      .contact-grid {
+      .cwrap {
+        background: #f4f4f4;
+        padding-block: 5rem;
+      }
+      .cwrap__inner {
+        max-width: 1600px;
+        margin-inline: auto;
+        padding-inline: 1.5rem;
         display: grid;
         gap: 2rem;
         align-items: stretch;
       }
+      @media (min-width: 768px) { .cwrap__inner { padding-inline: 3rem; } }
       @media (min-width: 1024px) {
-        .contact-grid {
+        .cwrap__inner {
           grid-template-columns: 1.4fr 1fr;
           gap: 3rem;
         }
       }
-      .contact-grid__form,
-      .contact-grid__info {
+      @media (min-width: 1280px) { .cwrap__inner { padding-inline: 70px; } }
+      .cwrap__form,
+      .cwrap__info {
         display: block;
         height: 100%;
       }

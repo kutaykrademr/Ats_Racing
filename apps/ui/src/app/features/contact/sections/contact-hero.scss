@@ -1,0 +1,206 @@
+.chero {
+  position: relative;
+  min-height: 88vh;
+  display: flex;
+  align-items: flex-end;
+  color: #ffffff;
+  overflow: hidden;
+  isolation: isolate;
+  padding-top: 6rem;
+}
+
+.chero__bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=2400&q=80');
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
+  transform: scale(1.05);
+  animation: ch-zoom 16s ease-out forwards;
+}
+
+.chero__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(13, 12, 15, 0.55) 0%, rgba(13, 12, 15, 0.3) 30%, rgba(13, 12, 15, 0.6) 65%, rgba(13, 12, 15, 0.95) 100%);
+  z-index: -1;
+}
+
+.chero__marquee {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30%;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.06;
+  z-index: 0;
+
+  span {
+    display: inline-block;
+    white-space: nowrap;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: clamp(6rem, 18vw, 16rem);
+    line-height: 1;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    animation: ch-marq 28s linear infinite;
+  }
+}
+
+.chero__inner {
+  position: relative;
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding: 4rem 1.5rem 4rem;
+
+  @media (min-width: 768px) {
+    padding: 6rem 3rem 5rem;
+  }
+  @media (min-width: 1280px) {
+    padding: 7rem 70px 5rem;
+  }
+}
+
+.chero__eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #ea0a0b;
+  margin: 0 0 1.5rem;
+}
+
+.chero__title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ffffff;
+  line-height: 0.94;
+  letter-spacing: -0.015em;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+}
+
+.chero__line {
+  display: block;
+}
+
+.chero__line--1 {
+  font-size: clamp(2.75rem, 9vw, 7rem);
+}
+
+.chero__line--2 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  padding-left: clamp(0px, 8vw, 120px);
+  margin-top: 0.4em;
+  color: #ea0a0b;
+}
+
+.chero__lead {
+  margin: 2rem 0 0;
+  max-width: 42rem;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.chero__quick {
+  list-style: none;
+  padding: 0;
+  margin: 3rem 0 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 56rem;
+  }
+}
+
+.chero__quick-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: rgba(13, 12, 15, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  text-decoration: none;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+
+  &:hover {
+    background: rgba(234, 10, 11, 0.18);
+    border-color: #ea0a0b;
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ea0a0b;
+    outline-offset: 3px;
+  }
+}
+
+.chero__quick-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.chero__quick-icon--accent {
+  background: #ea0a0b;
+}
+
+.chero__quick-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.chero__quick-lbl {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
+.chero__quick-val {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 1.0625rem;
+  color: #ffffff;
+}
+
+@keyframes ch-zoom {
+  from { transform: scale(1.12); }
+  to   { transform: scale(1); }
+}
+
+@keyframes ch-marq {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chero__bg, .chero__marquee span { animation: none; transform: none; }
+}
