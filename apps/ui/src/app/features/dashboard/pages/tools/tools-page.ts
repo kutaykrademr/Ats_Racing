@@ -17,6 +17,7 @@ interface Engine {
   stock: { hp: number; torque: number };
   stage1: { hp: number; torque: number };
   stage2: { hp: number; torque: number };
+  stage3: { hp: number; torque: number };
   displacement: string;
   ecu: string;
   fuel: string;
@@ -61,48 +62,48 @@ const CATALOG: Brand[] = [
   { label: 'BMW', models: [
     { label: 'M3', series: [
       { label: 'F80 (2014–2018)', engines: [
-        { label: 'S55B30 3.0T', stock: { hp: 431, torque: 550 }, stage1: { hp: 500, torque: 620 }, stage2: { hp: 560, torque: 680 }, displacement: '3.0L Twin Turbo', ecu: 'Bosch MG1CS001', fuel: 'Benzin', year: '2014–2018' },
+        { label: 'S55B30 3.0T', stock: { hp: 431, torque: 550 }, stage1: { hp: 500, torque: 620 }, stage2: { hp: 560, torque: 680 }, stage3: { hp: 640, torque: 780 }, displacement: '3.0L Twin Turbo', ecu: 'Bosch MG1CS001', fuel: 'Benzin', year: '2014–2018' },
       ]},
       { label: 'G80 (2021–)', engines: [
-        { label: 'S58B30 3.0T', stock: { hp: 510, torque: 650 }, stage1: { hp: 580, torque: 730 }, stage2: { hp: 650, torque: 820 }, displacement: '3.0L Twin Turbo', ecu: 'Bosch MG1CS024', fuel: 'Benzin', year: '2021–' },
+        { label: 'S58B30 3.0T', stock: { hp: 510, torque: 650 }, stage1: { hp: 580, torque: 730 }, stage2: { hp: 650, torque: 820 }, stage3: { hp: 730, torque: 920 }, displacement: '3.0L Twin Turbo', ecu: 'Bosch MG1CS024', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
     { label: 'M5', series: [
       { label: 'F90 (2018–)', engines: [
-        { label: 'S63B44 4.4T', stock: { hp: 600, torque: 750 }, stage1: { hp: 680, torque: 840 }, stage2: { hp: 750, torque: 920 }, displacement: '4.4L V8 TT', ecu: 'Bosch MED17', fuel: 'Benzin', year: '2018–' },
+        { label: 'S63B44 4.4T', stock: { hp: 600, torque: 750 }, stage1: { hp: 680, torque: 840 }, stage2: { hp: 750, torque: 920 }, stage3: { hp: 850, torque: 1020 }, displacement: '4.4L V8 TT', ecu: 'Bosch MED17', fuel: 'Benzin', year: '2018–' },
       ]},
     ]},
   ]},
   { label: 'Audi', models: [
     { label: 'RS6', series: [
       { label: 'C8 (2020–)', engines: [
-        { label: 'DKCE 4.0 TFSI', stock: { hp: 600, torque: 800 }, stage1: { hp: 680, torque: 880 }, stage2: { hp: 760, torque: 960 }, displacement: '4.0L V8 TT', ecu: 'Bosch MG1', fuel: 'Benzin', year: '2020–' },
+        { label: 'DKCE 4.0 TFSI', stock: { hp: 600, torque: 800 }, stage1: { hp: 680, torque: 880 }, stage2: { hp: 760, torque: 960 }, stage3: { hp: 860, torque: 1080 }, displacement: '4.0L V8 TT', ecu: 'Bosch MG1', fuel: 'Benzin', year: '2020–' },
       ]},
     ]},
     { label: 'S3', series: [
       { label: '8Y (2021–)', engines: [
-        { label: 'DKZ 2.0 TFSI', stock: { hp: 310, torque: 400 }, stage1: { hp: 370, torque: 470 }, stage2: { hp: 430, torque: 530 }, displacement: '2.0L Turbo', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
+        { label: 'DKZ 2.0 TFSI', stock: { hp: 310, torque: 400 }, stage1: { hp: 370, torque: 470 }, stage2: { hp: 430, torque: 530 }, stage3: { hp: 490, torque: 600 }, displacement: '2.0L Turbo', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
   ]},
   { label: 'Mercedes', models: [
     { label: 'C63 AMG', series: [
       { label: 'W205 (2015–2021)', engines: [
-        { label: 'M177 4.0T', stock: { hp: 476, torque: 650 }, stage1: { hp: 560, torque: 730 }, stage2: { hp: 630, torque: 810 }, displacement: '4.0L V8 TT', ecu: 'Bosch MED17', fuel: 'Benzin', year: '2015–2021' },
+        { label: 'M177 4.0T', stock: { hp: 476, torque: 650 }, stage1: { hp: 560, torque: 730 }, stage2: { hp: 630, torque: 810 }, stage3: { hp: 720, torque: 920 }, displacement: '4.0L V8 TT', ecu: 'Bosch MED17', fuel: 'Benzin', year: '2015–2021' },
       ]},
     ]},
   ]},
   { label: 'VW', models: [
     { label: 'Golf R', series: [
       { label: 'Mk8 (2021–)', engines: [
-        { label: 'DKZ 2.0 TSI', stock: { hp: 320, torque: 420 }, stage1: { hp: 380, torque: 490 }, stage2: { hp: 440, torque: 560 }, displacement: '2.0L Turbo', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
+        { label: 'DKZ 2.0 TSI', stock: { hp: 320, torque: 420 }, stage1: { hp: 380, torque: 490 }, stage2: { hp: 440, torque: 560 }, stage3: { hp: 510, torque: 640 }, displacement: '2.0L Turbo', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
   ]},
   { label: 'Porsche', models: [
     { label: '911', series: [
       { label: 'Turbo S 992 (2021–)', engines: [
-        { label: '9A2.51 3.8T', stock: { hp: 650, torque: 800 }, stage1: { hp: 730, torque: 890 }, stage2: { hp: 820, torque: 980 }, displacement: '3.8L Flat-6 TT', ecu: 'Bosch ME9.8', fuel: 'Benzin', year: '2021–' },
+        { label: '9A2.51 3.8T', stock: { hp: 650, torque: 800 }, stage1: { hp: 730, torque: 890 }, stage2: { hp: 820, torque: 980 }, stage3: { hp: 920, torque: 1100 }, displacement: '3.8L Flat-6 TT', ecu: 'Bosch ME9.8', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
   ]},
@@ -406,8 +407,17 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                     (click)="selTune.set('stage2')"
                   >
                     <span class="tune-opt__badge tune-opt__badge--red">Stage 2</span>
-                    <span class="tune-opt__desc">Downpipe + intercooler ile maksimum kazanım</span>
+                    <span class="tune-opt__desc">Downpipe + intercooler ile orta seviye kazanım</span>
                     <span class="tune-opt__gain">+{{ selEngine()!.stage2.hp - selEngine()!.stock.hp }} HP  /  +{{ selEngine()!.stage2.torque - selEngine()!.stock.torque }} Nm</span>
+                  </button>
+                  <button
+                    class="tune-opt" type="button"
+                    [class.tune-opt--s3]="selTune() === 'stage3'"
+                    (click)="selTune.set('stage3')"
+                  >
+                    <span class="tune-opt__badge tune-opt__badge--purple">Stage 3</span>
+                    <span class="tune-opt__desc">Turbo + yakıt sistemi upgrade ile maksimum kazanım</span>
+                    <span class="tune-opt__gain">+{{ selEngine()!.stage3.hp - selEngine()!.stock.hp }} HP  /  +{{ selEngine()!.stage3.torque - selEngine()!.stock.torque }} Nm</span>
                   </button>
                 </div>
               </div>
@@ -436,7 +446,7 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                     {{ tuningResult()!.displacement }} · {{ tuningResult()!.ecu }} · {{ tuningResult()!.fuel }} · {{ tuningResult()!.year }}
                   </p>
                 </div>
-                <div class="result-banner__tag">{{ selTune() === 'stage1' ? 'Stage 1' : 'Stage 2' }}</div>
+                <div class="result-banner__tag">{{ tuneLabel() }}</div>
               </div>
 
               <!-- HP / NM CARDS -->
@@ -457,7 +467,7 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                 </div>
                 <div class="power-arrow"><i class="pi pi-arrow-right"></i></div>
                 <div class="power-block power-block--tuned">
-                  <span class="power-block__lbl power-block__lbl--red">{{ selTune() === 'stage1' ? 'Stage 1' : 'Stage 2' }}</span>
+                  <span class="power-block__lbl power-block__lbl--red">{{ tuneLabel() }}</span>
                   <div class="power-block__vals">
                     <div class="power-val">
                       <span class="power-val__num power-val__num--white">{{ tunedHp() }}</span>
@@ -482,7 +492,7 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                     <h3 class="gauge-card__title" style="margin:0">Beygir Gücü (HP)</h3>
                     <div class="line-chart-legend">
                       <span class="lc-dot lc-dot--grey"></span><span>Orjinal</span>
-                      <span class="lc-dot lc-dot--red"></span><span>{{ selTune() === 'stage1' ? 'Stage 1' : 'Stage 2' }}</span>
+                      <span class="lc-dot lc-dot--red"></span><span>{{ tuneLabel() }}</span>
                     </div>
                   </div>
                   @if (hpChart()) {
@@ -522,7 +532,7 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                     <h3 class="gauge-card__title" style="margin:0">Tork (Nm)</h3>
                     <div class="line-chart-legend">
                       <span class="lc-dot lc-dot--grey"></span><span>Orjinal</span>
-                      <span class="lc-dot lc-dot--red"></span><span>{{ selTune() === 'stage1' ? 'Stage 1' : 'Stage 2' }}</span>
+                      <span class="lc-dot lc-dot--red"></span><span>{{ tuneLabel() }}</span>
                     </div>
                   </div>
                   @if (torqueChart()) {
@@ -681,7 +691,7 @@ export class ToolsPage {
   protected readonly selModel      = signal('');
   protected readonly selSeries     = signal('');
   protected readonly selEngineName = signal('');
-  protected readonly selTune       = signal<'stage1' | 'stage2'>('stage1');
+  protected readonly selTune       = signal<'stage1' | 'stage2' | 'stage3'>('stage1');
   protected readonly tuningResult  = signal<Engine | null>(null);
 
   protected readonly availableModels = computed(() =>
@@ -701,12 +711,16 @@ export class ToolsPage {
   protected readonly tunedHp = computed(() => {
     const e = this.tuningResult();
     if (!e) { return 0; }
-    return this.selTune() === 'stage1' ? e.stage1.hp : e.stage2.hp;
+    return e[this.selTune()].hp;
   });
   protected readonly tunedTorque = computed(() => {
     const e = this.tuningResult();
     if (!e) { return 0; }
-    return this.selTune() === 'stage1' ? e.stage1.torque : e.stage2.torque;
+    return e[this.selTune()].torque;
+  });
+  protected readonly tuneLabel = computed(() => {
+    const map = { stage1: 'Stage 1', stage2: 'Stage 2', stage3: 'Stage 3' } as const;
+    return map[this.selTune()];
   });
   protected readonly hpBarPct = computed(() => {
     const e = this.tuningResult();
