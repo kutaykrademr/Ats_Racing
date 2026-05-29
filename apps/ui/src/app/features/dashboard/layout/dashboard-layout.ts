@@ -304,9 +304,10 @@ export class DashboardLayout {
   logout(): void { this.auth.logout(); this.router.navigate(['/login']); }
 
   protected readonly navItems: NavItem[] = [
-    { label: 'Genel Bakış', icon: 'pi-home',        route: '/dashboard/overview' },
-    { label: 'Dosyalarım',  icon: 'pi-folder-open', route: '/dashboard/files' },
-    { label: 'Araçlar',     icon: 'pi-sliders-h',   route: '/dashboard/tools' },
-    { label: 'Destek',      icon: 'pi-headphones',  route: '/dashboard/support' },
+    { label: 'Genel Bakış',  icon: 'pi-home',          route: '/dashboard/overview' },
+    { label: 'Siparişlerim', icon: 'pi-shopping-cart',  route: '/dashboard/orders'   },
+    { label: 'Dosyalarım',   icon: 'pi-folder-open',   route: '/dashboard/files'    },
+    { label: 'Araçlar',      icon: 'pi-sliders-h',     route: '/dashboard/tools'    },
+    { label: 'Destek',       icon: 'pi-headphones',    route: '/dashboard/support'  },
   ];
 }

@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 type TicketStatus = 'open' | 'pending' | 'resolved';
@@ -17,7 +16,7 @@ const MOCK_TICKETS: AdminTicket[] = [
   { id: 'TKT-003', user: 'Ali Yıldız',  email: 'kullanici@atsracing.com', order: 'ORD-003', subject: 'DPF ışığı hala yanıyor',
     status: 'open', date: '18 Mar 2026',
     messages: [
-      { id: 'm1', sender: 'user',    time: '18 Mar, 09:00', text: 'DPF modülü yüklendi fakat gösterge panelinde DPF uyarı ışığı hala yanıyor.' },
+      { id: 'm1', sender: 'user', time: '18 Mar, 09:00', text: 'DPF modülü yüklendi fakat gösterge panelinde DPF uyarı ışığı hala yanıyor.' },
     ],
   },
   { id: 'TKT-001', user: 'Ali Yıldız',  email: 'kullanici@atsracing.com', order: 'ORD-001', subject: 'Yazılım sonrası rölantide titreme',
@@ -31,7 +30,14 @@ const MOCK_TICKETS: AdminTicket[] = [
   { id: 'TKT-005', user: 'Mert Kaya',   email: 'mert@gmail.com',          order: 'ORD-047', subject: 'Stage 2 sonrası DTC kodları',
     status: 'open', date: '28 May 2026',
     messages: [
-      { id: 'm5', sender: 'user',    time: '28 May, 14:00', text: 'Stage 2 yazılımı sonrasında P0299 ve P0234 kodları geliyor, araç boost basıncı aşıyor mu?' },
+      { id: 'm5', sender: 'user', time: '28 May, 14:00', text: 'Stage 2 yazılımı sonrasında P0299 ve P0234 kodları geliyor, araç boost basıncı aşıyor mu?' },
+    ],
+  },
+  { id: 'TKT-004', user: 'Zeynep Arslan', email: 'zeynep@gmail.com',        order: 'ORD-044', subject: 'Şanzıman kayması sorunu',
+    status: 'pending', date: '25 May 2026',
+    messages: [
+      { id: 'm8', sender: 'user',    time: '25 May, 11:00', text: 'Stage 2 sonrası şanzıman kayması yaşıyorum, yazılımla ilgili mi?' },
+      { id: 'm9', sender: 'support', time: '25 May, 14:30', text: 'Şanzıman adaptasyonunu sıfırlamayı deneyin. Servise gitmenizi öneririz.' },
     ],
   },
   { id: 'TKT-002', user: 'Ali Yıldız',  email: 'kullanici@atsracing.com', order: 'ORD-002', subject: 'Stage 2 için intercooler tavsiyesi',
@@ -48,34 +54,40 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
 @Component({
   selector: 'app-admin-tickets',
   standalone: true,
-  imports: [DatePipe, FormsModule],
+  imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
 <div class="atk">
   <div class="atk__header">
     <div>
       <h1 class="atk__title">Ticketlar</h1>
-      <p class="atk__sub">{{ tickets().length }} toplam · {{ openCount() }} açık</p>
+      <p class="atk__sub">{{ tickets().length }} toplam</p>
     </div>
-    <div class="atk__filters">
-      <div class="atk-search">
-        <i class="pi pi-search"></i>
-        <input type="text" placeholder="Ticket veya kullanıcı ara…" [(ngModel)]="search" />
-      </div>
-      <div class="atk-fw">
-        <select class="atk-filter" [(ngModel)]="filterStatus">
-          <option value="">Tüm Durumlar</option>
-          <option value="open">Açık</option>
-          <option value="pending">Beklemede</option>
-          <option value="resolved">Çözüldü</option>
-        </select>
-      </div>
+    <div class="atk-search">
+      <i class="pi pi-search"></i>
+      <input type="text" placeholder="Ticket veya kullanıcı ara…" [(ngModel)]="search" />
     </div>
+  </div>
+
+  <!-- Status tabs -->
+  <div class="atk__tabs">
+    <button class="atk-tab" [class.atk-tab--active]="activeStatus() === ''"         type="button" (click)="activeStatus.set('')">
+      Tümü <span class="atk-tab__count">{{ tickets().length }}</span>
+    </button>
+    <button class="atk-tab atk-tab--open"     [class.atk-tab--active]="activeStatus() === 'open'"     type="button" (click)="activeStatus.set('open')">
+      <span class="atk-dot atk-dot--open"></span> Açık <span class="atk-tab__count">{{ countBy('open') }}</span>
+    </button>
+    <button class="atk-tab atk-tab--pending"  [class.atk-tab--active]="activeStatus() === 'pending'"  type="button" (click)="activeStatus.set('pending')">
+      <span class="atk-dot atk-dot--pending"></span> Beklemede <span class="atk-tab__count">{{ countBy('pending') }}</span>
+    </button>
+    <button class="atk-tab atk-tab--resolved" [class.atk-tab--active]="activeStatus() === 'resolved'" type="button" (click)="activeStatus.set('resolved')">
+      <span class="atk-dot atk-dot--resolved"></span> Çözüldü <span class="atk-tab__count">{{ countBy('resolved') }}</span>
+    </button>
   </div>
 
   <div class="atk__layout">
 
-    <!-- List -->
+    <!-- Ticket list -->
     <div class="atk__list">
       @for (t of filtered(); track t.id) {
         <button type="button" class="atk-row" [class.atk-row--active]="activeId() === t.id" (click)="activeId.set(t.id)">
@@ -88,6 +100,9 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
           <p class="atk-row__preview">{{ t.messages[t.messages.length - 1].text }}</p>
         </button>
       }
+      @if (filtered().length === 0) {
+        <div class="atk__list-empty"><i class="pi pi-inbox"></i><p>Ticket bulunamadı</p></div>
+      }
     </div>
 
     <!-- Conversation -->
@@ -98,21 +113,38 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
           <p>Cevaplamak için bir ticket seçin</p>
         </div>
       } @else {
+        <!-- Head -->
         <div class="atk-convo__head">
           <div class="atk-convo__head-left">
-            <span class="atk-badge atk-badge--{{ active()!.status }}">{{ statusLabel(active()!.status) }}</span>
             <div>
               <h2 class="atk-convo__subject">{{ active()!.subject }}</h2>
               <p class="atk-convo__meta">{{ active()!.user }} · {{ active()!.email }} · {{ active()!.order }}</p>
             </div>
           </div>
-          @if (active()!.status !== 'resolved') {
-            <button class="atk-ghost-btn" type="button" (click)="resolve(active()!.id)">
-              <i class="pi pi-check"></i> Çözüldü Olarak Kapat
-            </button>
-          }
+          <!-- Status change controls -->
+          <div class="atk-convo__status-ctrl">
+            <span class="atk-badge atk-badge--{{ active()!.status }}">{{ statusLabel(active()!.status) }}</span>
+            <div class="atk-status-actions">
+              @if (active()!.status !== 'open') {
+                <button class="atk-status-btn atk-status-btn--open" type="button" (click)="changeStatus(active()!.id, 'open')">
+                  <span class="atk-dot atk-dot--open"></span> Açık
+                </button>
+              }
+              @if (active()!.status !== 'pending') {
+                <button class="atk-status-btn atk-status-btn--pending" type="button" (click)="changeStatus(active()!.id, 'pending')">
+                  <span class="atk-dot atk-dot--pending"></span> Beklemede
+                </button>
+              }
+              @if (active()!.status !== 'resolved') {
+                <button class="atk-status-btn atk-status-btn--resolved" type="button" (click)="changeStatus(active()!.id, 'resolved')">
+                  <i class="pi pi-check"></i> Çözüldü
+                </button>
+              }
+            </div>
+          </div>
         </div>
 
+        <!-- Messages -->
         <div class="atk-messages">
           @for (msg of active()!.messages; track msg.id) {
             <div class="atk-msg" [class.atk-msg--user]="msg.sender === 'user'" [class.atk-msg--support]="msg.sender === 'support'">
@@ -130,6 +162,7 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
           }
         </div>
 
+        <!-- Reply -->
         @if (active()!.status !== 'resolved') {
           <div class="atk-reply">
             <textarea class="atk-reply__input" rows="3" placeholder="Cevabınızı yazın…" [(ngModel)]="replyText"></textarea>
@@ -138,7 +171,12 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
             </button>
           </div>
         } @else {
-          <div class="atk-resolved-note"><i class="pi pi-check-circle"></i> Bu ticket çözüldü olarak kapatılmıştır.</div>
+          <div class="atk-resolved-note">
+            <i class="pi pi-check-circle"></i> Bu ticket çözüldü olarak kapatılmıştır.
+            <button class="atk-reopen-btn" type="button" (click)="changeStatus(active()!.id, 'open')">
+              <i class="pi pi-refresh"></i> Yeniden Aç
+            </button>
+          </div>
         }
       }
     </div>
@@ -147,27 +185,41 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
 </div>
   `,
   styles: [`
-    .atk { display: flex; flex-direction: column; gap: 1.5rem; }
+    .atk { display: flex; flex-direction: column; gap: 1.25rem; }
     .atk__title { font-size: 1.6rem; font-weight: 700; color: #fff; margin: 0; }
     .atk__sub { font-size: 0.875rem; color: rgba(255,255,255,0.4); margin: 0.25rem 0 0; }
     .atk__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-    .atk__filters { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
     .atk-search {
       display: flex; align-items: center; gap: 0.5rem;
       background: #13151c; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0 0.9rem;
       i { color: rgba(255,255,255,0.3); font-size: 0.8rem; }
-      input { background: transparent; border: none; color: rgba(255,255,255,0.85); font-size: 0.85rem; padding: 0.6rem 0; width: 200px; &:focus { outline: none; } &::placeholder { color: rgba(255,255,255,0.2); } }
+      input { background: transparent; border: none; color: rgba(255,255,255,0.85); font-size: 0.85rem; padding: 0.6rem 0; width: 220px; &:focus { outline: none; } &::placeholder { color: rgba(255,255,255,0.2); } }
     }
-    .atk-fw { position: relative; }
-    .atk-filter { background: #13151c; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0.6rem 1rem; color: rgba(255,255,255,0.75); font-size: 0.8rem; cursor: pointer; appearance: none; min-width: 130px; option { background: #1a1d27; } }
 
-    .atk__layout { display: grid; grid-template-columns: 320px 1fr; gap: 1.25rem; align-items: start; @media(max-width:860px){ grid-template-columns: 1fr; } }
+    /* ── Tabs ── */
+    .atk__tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; padding-bottom: 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .atk-tab {
+      display: flex; align-items: center; gap: 0.45rem; padding: 0.6rem 1rem; border-radius: 10px 10px 0 0; border: none; cursor: pointer;
+      background: transparent; color: rgba(255,255,255,0.4); font-size: 0.82rem; font-weight: 500; transition: all 160ms;
+      &:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.8); }
+      &--active { color: #fff; border-bottom: 2px solid #f59e0b; background: rgba(245,158,11,0.07); }
+      &__count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; border-radius: 10px; padding: 0 5px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); font-size: 0.68rem; font-weight: 700; }
+    }
+    .atk-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50; border-radius: 50%;
+      &--open     { background: #fbbf24; }
+      &--pending  { background: #60a5fa; box-shadow: 0 0 4px #60a5fa88; }
+      &--resolved { background: #4ade80; }
+    }
 
-    /* List */
+    /* ── Layout ── */
+    .atk__layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.25rem; align-items: start; @media(max-width:860px){ grid-template-columns: 1fr; } }
+
+    /* ── Ticket list ── */
     .atk__list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .atk__list-empty { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 2.5rem; color: rgba(255,255,255,0.2); i { font-size: 2rem; } p { font-size: 0.8rem; margin: 0; } }
     .atk-row {
-      width: 100%; text-align: left; border: none; cursor: pointer;
+      width: 100%; text-align: left; cursor: pointer;
       background: #13151c; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 1rem;
       display: flex; flex-direction: column; gap: 0.3rem; transition: border-color 180ms;
       &:hover { border-color: rgba(255,255,255,0.14); }
@@ -181,36 +233,38 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
 
     .atk-badge {
       display: inline-flex; padding: 0.18rem 0.55rem; border-radius: 6px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-      &--open    { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
-      &--pending { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
-      &--resolved{ background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+      &--open     { background: rgba(251,191,36,0.12);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.2);  }
+      &--pending  { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.2);  }
+      &--resolved { background: rgba(74,222,128,0.12);  color: #4ade80; border: 1px solid rgba(74,222,128,0.2);  }
     }
 
-    /* Conversation */
+    /* ── Conversation ── */
     .atk__convo { background: #13151c; border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; min-height: 500px; }
     .atk__convo-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; color: rgba(255,255,255,0.2); i { font-size: 3rem; } p { font-size: 0.875rem; margin: 0; } }
 
     .atk-convo__head {
-      display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
+      display: flex; flex-direction: column; gap: 0.75rem;
       padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.07);
       &-left { display: flex; align-items: flex-start; gap: 0.75rem; }
     }
     .atk-convo__subject { font-size: 1rem; font-weight: 700; color: #fff; margin: 0 0 3px; }
     .atk-convo__meta { font-size: 0.72rem; color: rgba(255,255,255,0.35); margin: 0; }
 
-    .atk-ghost-btn {
-      display: flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.12); background: transparent; color: rgba(255,255,255,0.6); font-size: 0.78rem; cursor: pointer;
-      &:hover { border-color: rgba(74,222,128,0.4); color: #4ade80; }
+    .atk-convo__status-ctrl { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .atk-status-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .atk-status-btn {
+      display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 160ms;
+      &--open     { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.2);  &:hover { background: rgba(251,191,36,0.2);  } }
+      &--pending  { background: rgba(96,165,250,0.1);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.2);  &:hover { background: rgba(96,165,250,0.2);  } }
+      &--resolved { background: rgba(74,222,128,0.1);  color: #4ade80; border: 1px solid rgba(74,222,128,0.2);  &:hover { background: rgba(74,222,128,0.2);  } }
+      i { font-size: 0.7rem; }
     }
 
     .atk-messages { flex: 1; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; overflow-y: auto; max-height: 420px; }
     .atk-msg {
       display: flex; gap: 0.75rem;
       &--user { flex-direction: row-reverse; }
-      &__avatar {
-        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-        display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;
+      &__avatar { width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;
         &--support { background: rgba(245,158,11,0.15); color: #f59e0b; }
         &--user    { background: rgba(96,165,250,0.15); color: #60a5fa; }
       }
@@ -227,27 +281,35 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
     .atk-reply { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.07); display: flex; gap: 0.75rem; align-items: flex-end; }
     .atk-reply__input { flex: 1; background: #0d0f14; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 0.75rem 1rem; color: rgba(255,255,255,0.85); font-size: 0.875rem; resize: none; font-family: inherit; &:focus { outline: none; border-color: rgba(245,158,11,0.4); } &::placeholder { color: rgba(255,255,255,0.2); } }
     .atk-send-btn { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; padding: 0.65rem 1.25rem; border-radius: 10px; border: none; cursor: pointer; background: linear-gradient(135deg,#f59e0b,#d97706); color: #000; font-size: 0.875rem; font-weight: 700; &:hover:not(:disabled) { opacity: 0.88; } &:disabled { opacity: 0.35; cursor: not-allowed; } }
-    .atk-resolved-note { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #4ade80; }
+
+    .atk-resolved-note { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.07); display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #4ade80; flex-wrap: wrap; }
+    .atk-reopen-btn { display: flex; align-items: center; gap: 0.35rem; margin-left: auto; padding: 0.35rem 0.75rem; border-radius: 7px; border: 1px solid rgba(251,191,36,0.2); background: rgba(251,191,36,0.08); color: #fbbf24; font-size: 0.75rem; cursor: pointer; &:hover { background: rgba(251,191,36,0.15); } i { font-size: 0.7rem; } }
   `],
 })
 export class AdminTicketsPage {
   protected readonly tickets = signal<AdminTicket[]>(MOCK_TICKETS);
-  protected search       = '';
-  protected filterStatus = '';
+  protected readonly activeStatus = signal<TicketStatus | ''>('');
+  protected search = '';
   protected readonly activeId = signal<string | null>(null);
   protected replyText = '';
 
   protected readonly active = computed(() => this.tickets().find(t => t.id === this.activeId()) ?? null);
-  protected readonly openCount = computed(() => this.tickets().filter(t => t.status !== 'resolved').length);
+  protected countBy(s: TicketStatus): number { return this.tickets().filter(t => t.status === s).length; }
+
   protected readonly filtered = computed(() => {
     let list = this.tickets();
     if (this.search) { const q = this.search.toLowerCase(); list = list.filter(t => t.subject.toLowerCase().includes(q) || t.user.toLowerCase().includes(q) || t.id.toLowerCase().includes(q)); }
-    if (this.filterStatus) { list = list.filter(t => t.status === this.filterStatus); }
+    const status = this.activeStatus();
+    if (status) { list = list.filter(t => t.status === status); }
     return list;
   });
 
   statusLabel(s: TicketStatus): string { return STATUS_LABEL[s]; }
   userInitials(name: string): string { return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
+
+  changeStatus(id: string, status: TicketStatus): void {
+    this.tickets.update(list => list.map(t => t.id === id ? { ...t, status } : t));
+  }
 
   sendReply(): void {
     const text = this.replyText.trim();
@@ -258,9 +320,5 @@ export class AdminTicketsPage {
         : t
     ));
     this.replyText = '';
-  }
-
-  resolve(id: string): void {
-    this.tickets.update(list => list.map(t => t.id === id ? { ...t, status: 'resolved' as TicketStatus } : t));
   }
 }

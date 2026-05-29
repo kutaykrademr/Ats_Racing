@@ -21,8 +21,8 @@ export const adminRoutes: Route[] = [
       },
       {
         path: 'dealers',
-        loadComponent: () => import('./pages/users/admin-users-page').then(m => m.AdminUsersPage),
-        data: { title: 'Bayiler' },
+        redirectTo: 'users',
+        pathMatch: 'full',
       },
       {
         path: 'orders',
