@@ -111,6 +111,12 @@ const CATALOG: Brand[] = [
 
 const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
 
+const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
+  stage1: 2500,
+  stage2: 4000,
+  stage3: 7500,
+};
+
 @Component({
   selector: 'app-tools-page',
   standalone: true,
@@ -129,21 +135,21 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
       <div class="tab-bar" role="tablist">
         <button
           class="tab-btn"
-          [class.tab-btn--active]="activeTab() === 'module'"
-          (click)="activeTab.set('module')"
-          role="tab"
-          [attr.aria-selected]="activeTab() === 'module'"
-        >
-          <i class="pi pi-sliders-v"></i> Modüller
-        </button>
-        <button
-          class="tab-btn"
           [class.tab-btn--active]="activeTab() === 'tuning'"
           (click)="activeTab.set('tuning')"
           role="tab"
           [attr.aria-selected]="activeTab() === 'tuning'"
         >
           <i class="pi pi-bolt"></i> Chip Tuning
+        </button>
+        <button
+          class="tab-btn"
+          [class.tab-btn--active]="activeTab() === 'module'"
+          (click)="activeTab.set('module')"
+          role="tab"
+          [attr.aria-selected]="activeTab() === 'module'"
+        >
+          <i class="pi pi-sliders-v"></i> Modüller
         </button>
       </div>
 
@@ -397,7 +403,10 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                     [class.tune-opt--s1]="selTune() === 'stage1'"
                     (click)="selTune.set('stage1')"
                   >
-                    <span class="tune-opt__badge tune-opt__badge--blue">Stage 1</span>
+                    <span class="tune-opt__head">
+                      <span class="tune-opt__badge tune-opt__badge--blue">Stage 1</span>
+                      <span class="tune-opt__price">₺{{ tuningPrices['stage1'] | number }}</span>
+                    </span>
                     <span class="tune-opt__desc">Sadece yazılım — ek donanım gerektirmez</span>
                     <span class="tune-opt__gain">+{{ selEngine()!.stage1.hp - selEngine()!.stock.hp }} HP  /  +{{ selEngine()!.stage1.torque - selEngine()!.stock.torque }} Nm</span>
                   </button>
@@ -406,7 +415,10 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                     [class.tune-opt--s2]="selTune() === 'stage2'"
                     (click)="selTune.set('stage2')"
                   >
-                    <span class="tune-opt__badge tune-opt__badge--red">Stage 2</span>
+                    <span class="tune-opt__head">
+                      <span class="tune-opt__badge tune-opt__badge--red">Stage 2</span>
+                      <span class="tune-opt__price">₺{{ tuningPrices['stage2'] | number }}</span>
+                    </span>
                     <span class="tune-opt__desc">Downpipe + intercooler ile orta seviye kazanım</span>
                     <span class="tune-opt__gain">+{{ selEngine()!.stage2.hp - selEngine()!.stock.hp }} HP  /  +{{ selEngine()!.stage2.torque - selEngine()!.stock.torque }} Nm</span>
                   </button>
@@ -415,7 +427,10 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                     [class.tune-opt--s3]="selTune() === 'stage3'"
                     (click)="selTune.set('stage3')"
                   >
-                    <span class="tune-opt__badge tune-opt__badge--purple">Stage 3</span>
+                    <span class="tune-opt__head">
+                      <span class="tune-opt__badge tune-opt__badge--purple">Stage 3</span>
+                      <span class="tune-opt__price">₺{{ tuningPrices['stage3'] | number }}</span>
+                    </span>
                     <span class="tune-opt__desc">Turbo + yakıt sistemi upgrade ile maksimum kazanım</span>
                     <span class="tune-opt__gain">+{{ selEngine()!.stage3.hp - selEngine()!.stock.hp }} HP  /  +{{ selEngine()!.stage3.torque - selEngine()!.stock.torque }} Nm</span>
                   </button>
@@ -580,16 +595,167 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
                 </div>
               </div>
 
-              <div class="result-cta">
-                <button class="cta-btn cta-btn--primary" type="button">
-                  <i class="pi pi-shopping-cart"></i> Yazılım Satın Al
-                </button>
-                <a href="/contact" class="cta-btn cta-btn--outline">
-                  <i class="pi pi-headphones"></i> Uzmanla Konuş
-                </a>
+            </div>
+          }
+
+          <!-- ════ POST-RESULT FLOW: file upload + add-on modules + checkout ════ -->
+          @if (tuningResult()) {
+
+            <!-- STEP 2 — FILE UPLOAD -->
+            <div class="step-card">
+              <div class="step-card__head">
+                <div class="step-num">2</div>
+                <div>
+                  <h2 class="step-card__title">Orijinal Dosyanı Yükle</h2>
+                  <p class="step-card__sub">Ekibimiz yazılımı kişiselleştirebilmek için aracınızdan okunan orijinal ECU dosyasına ihtiyaç duyar</p>
+                </div>
               </div>
 
+              <div
+                class="upload-zone"
+                [class.upload-zone--drag]="isDragging()"
+                [class.upload-zone--filled]="uploadedFile()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="isDragging.set(false)"
+                (drop)="onDrop($event)"
+              >
+                @if (!uploadedFile()) {
+                  <div class="upload-zone__inner">
+                    <div class="upload-zone__icon">
+                      <i class="pi pi-cloud-upload"></i>
+                    </div>
+                    <p class="upload-zone__title">Orijinal ECU Dosyasını Sürükle & Bırak</p>
+                    <p class="upload-zone__hint">.bin · .ori · .hex · .kess · .ktag formatları desteklenir</p>
+                    <label class="upload-zone__btn">
+                      <i class="pi pi-folder-open"></i> Dosya Seç
+                      <input
+                        type="file"
+                        accept=".bin,.ori,.hex,.mod,.kess,.ktag"
+                        (change)="onFileSelect($event)"
+                        style="display:none"
+                      />
+                    </label>
+                  </div>
+                } @else {
+                  <div class="upload-file-info">
+                    <div class="upload-file-info__icon">
+                      <i class="pi pi-file"></i>
+                    </div>
+                    <div class="upload-file-info__body">
+                      <span class="upload-file-info__name">{{ uploadedFile()!.name }}</span>
+                      <span class="upload-file-info__meta">{{ formatSize(uploadedFile()!.size) }} · Hazır</span>
+                    </div>
+                    <button class="upload-file-info__remove" (click)="uploadedFile.set(null)" type="button" aria-label="Dosyayı kaldır">
+                      <i class="pi pi-times"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <p class="upload-hint-note">
+                <i class="pi pi-info-circle"></i>
+                Dosyanız yoksa "Uzmanla Konuş" butonundan destek ekibimize ulaşabilirsiniz.
+              </p>
             </div>
+
+            <!-- STEP 3 — OPTIONAL ADD-ON MODULES -->
+            <div class="step-card">
+              <div class="step-card__head">
+                <div class="step-num">3</div>
+                <div>
+                  <h2 class="step-card__title">Ekstra Modüller <span class="optional-pill">Opsiyonel</span></h2>
+                  <p class="step-card__sub">Yazılımınıza eklemek istediğiniz modülleri seçin. Boş bırakırsanız sadece chip tuning siparişi oluşturulur.</p>
+                </div>
+                <div class="step-card__actions">
+                  <button class="ghost-btn ghost-btn--danger" (click)="clearAll()" type="button" [disabled]="selectedModules().size === 0">Temizle</button>
+                </div>
+              </div>
+
+              @for (group of groups; track group) {
+                <div class="mod-group">
+                  <h3 class="mod-group__title">{{ group }}</h3>
+                  <div class="mod-grid">
+                    @for (mod of modulesByGroup(group); track mod.key) {
+                      <button
+                        class="mod-tile"
+                        [class.mod-tile--on]="isSelected(mod.key)"
+                        (click)="toggleModule(mod.key)"
+                        type="button"
+                      >
+                        <div class="mod-tile__top">
+                          <span class="mod-tile__label">{{ mod.label }}</span>
+                          <span class="mod-indicator" [class.mod-indicator--on]="isSelected(mod.key)">
+                            {{ isSelected(mod.key) ? 'ON' : 'OFF' }}
+                          </span>
+                        </div>
+                        <p class="mod-tile__desc">{{ mod.desc }}</p>
+                        <span class="mod-tile__price">+{{ mod.price | number }}₺</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- STEP 4 — ORDER SUMMARY + CTA -->
+            <div class="order-summary order-summary--tuning">
+              <div class="order-summary__left">
+                <span class="order-summary__count">Sipariş Özeti</span>
+                <div class="order-summary__lines">
+                  <div class="order-line">
+                    <span class="order-line__k">{{ selBrand() }} {{ selModel() }} · {{ tuneLabel() }}</span>
+                    <span class="order-line__v">₺{{ tuningPrice() | number }}</span>
+                  </div>
+                  @if (selectedModules().size > 0) {
+                    <div class="order-line">
+                      <span class="order-line__k">{{ selectedModules().size }} ekstra modül</span>
+                      <span class="order-line__v">₺{{ totalPrice() | number }}</span>
+                    </div>
+                  }
+                  @if (uploadedFile()) {
+                    <div class="order-line order-line--ok">
+                      <span class="order-line__k"><i class="pi pi-check-circle"></i> Dosya yüklendi: {{ uploadedFile()!.name }}</span>
+                    </div>
+                  } @else {
+                    <div class="order-line order-line--warn">
+                      <span class="order-line__k"><i class="pi pi-exclamation-circle"></i> Dosya henüz yüklenmedi</span>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="order-summary__right">
+                <div class="order-summary__total">
+                  <span class="order-summary__total-lbl">Toplam</span>
+                  <span class="order-summary__total-val">₺{{ tuningGrandTotal() | number }}</span>
+                </div>
+                <div class="order-summary__actions">
+                  <button class="cta-btn cta-btn--primary" type="button" [disabled]="!uploadedFile()" (click)="submitOrder()">
+                    <i class="pi pi-shopping-cart"></i> Sipariş Ver
+                  </button>
+                  <a href="/contact" class="cta-btn cta-btn--outline">
+                    <i class="pi pi-headphones"></i> Uzmanla Konuş
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- SUCCESS -->
+            @if (orderSent()) {
+              <div class="order-success">
+                <div class="order-success__icon"><i class="pi pi-check-circle"></i></div>
+                <div class="order-success__body">
+                  <h3>Siparişiniz Alındı!</h3>
+                  <p>
+                    {{ tuneLabel() }} yazılım siparişiniz
+                    @if (selectedModules().size > 0) {
+                      <span>ve {{ selectedModules().size }} ekstra modül</span>
+                    }
+                    ekibimize iletildi. Hazırlık tamamlanınca e-posta ile bilgilendirileceksiniz.
+                  </p>
+                </div>
+                <button class="ghost-btn" (click)="resetOrder()" type="button">Yeni Sipariş</button>
+              </div>
+            }
           }
 
         </div>
@@ -601,7 +767,10 @@ const GROUPS = ['Emisyon', 'Motor', 'Performans', 'Konfor', 'Güvenlik'];
 })
 export class ToolsPage {
   /* ─── TAB ─── */
-  protected readonly activeTab = signal<TabKey>('module');
+  protected readonly activeTab = signal<TabKey>('tuning');
+
+  /* ─── TUNING PRICES (referenced from template) ─── */
+  protected readonly tuningPrices = TUNING_PRICES;
 
   /* ─── MODULE TAB STATE ─── */
   protected readonly brandsModule = BRANDS_MODULE;
@@ -657,6 +826,13 @@ export class ToolsPage {
     this.uploadedFile.set(null);
     this.modBrand.set('');
     this.modEcu.set('');
+    // also reset tuning state
+    this.tuningResult.set(null);
+    this.selBrand.set('');
+    this.selModel.set('');
+    this.selSeries.set('');
+    this.selEngineName.set('');
+    this.selTune.set('stage1');
   }
   onModBrand(ev: Event): void {
     this.modBrand.set((ev.target as HTMLSelectElement).value);
@@ -722,6 +898,8 @@ export class ToolsPage {
     const map = { stage1: 'Stage 1', stage2: 'Stage 2', stage3: 'Stage 3' } as const;
     return map[this.selTune()];
   });
+  protected readonly tuningPrice = computed(() => TUNING_PRICES[this.selTune()]);
+  protected readonly tuningGrandTotal = computed(() => this.tuningPrice() + this.totalPrice());
   protected readonly hpBarPct = computed(() => {
     const e = this.tuningResult();
     if (!e) { return 0; }
