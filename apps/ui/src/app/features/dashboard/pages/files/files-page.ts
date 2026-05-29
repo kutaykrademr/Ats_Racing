@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 interface TuningFile {
   id: string;
@@ -18,7 +19,7 @@ interface TuningFile {
 @Component({
   selector: 'app-files-page',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, FormsModule],
+  imports: [DecimalPipe, DatePipe, FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="fp">
@@ -132,9 +133,9 @@ interface TuningFile {
                         <i class="pi pi-clock"></i>
                       </button>
                     }
-                    <button class="fp__btn" title="Detay">
+                    <a class="fp__btn" title="Detay" [routerLink]="['/dashboard/files', f.id]">
                       <i class="pi pi-eye"></i>
-                    </button>
+                    </a>
                   </div>
                 </td>
               </tr>

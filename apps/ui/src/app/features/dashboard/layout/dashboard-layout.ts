@@ -276,7 +276,7 @@ interface NavItem {
       padding: 0.25rem;
     }
 
-    .dash-content { flex: 1; padding: 2rem 1.75rem; overflow-x: hidden; }
+    .dash-content { flex: 1; padding: 2rem 1.75rem; overflow-x: clip; }
 
     /* ── MOBILE ── */
     .dash-overlay {
@@ -296,8 +296,9 @@ export class DashboardLayout {
   protected readonly mobileOpen = signal(false);
 
   protected readonly navItems: NavItem[] = [
-    { label: 'Genel Bakış', icon: 'pi-home', route: '/dashboard/overview' },
-    { label: 'Dosyalarım', icon: 'pi-folder-open', route: '/dashboard/files' },
-    { label: 'Araçlar', icon: 'pi-sliders-h', route: '/dashboard/tools' },
+    { label: 'Genel Bakış', icon: 'pi-home',        route: '/dashboard/overview' },
+    { label: 'Dosyalarım',  icon: 'pi-folder-open', route: '/dashboard/files' },
+    { label: 'Araçlar',     icon: 'pi-sliders-h',   route: '/dashboard/tools' },
+    { label: 'Destek',      icon: 'pi-headphones',  route: '/dashboard/support' },
   ];
 }

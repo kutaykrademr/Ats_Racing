@@ -24,10 +24,22 @@ export const dashboardRoutes: Route[] = [
         data: { title: 'Dosyalarım' },
       },
       {
+        path: 'files/:id',
+        loadComponent: () =>
+          import('./pages/files/file-detail-page').then(m => m.FileDetailPage),
+        data: { title: 'Dosya Detayı' },
+      },
+      {
         path: 'tools',
         loadComponent: () =>
           import('./pages/tools/tools-page').then(m => m.ToolsPage),
         data: { title: 'Araçlar' },
+      },
+      {
+        path: 'support',
+        loadComponent: () =>
+          import('./pages/support/support-page').then(m => m.SupportPage),
+        data: { title: 'Destek' },
       },
     ],
   },

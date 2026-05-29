@@ -3,15 +3,13 @@
   <div class="chip__veil" aria-hidden="true"></div>
 
   <div class="chip__inner">
-    <form class="chip__bar" (ngSubmit)="calculate()">
+
+    <!-- ─── Floating search bar ─── -->
+    <form class="chip__bar" (ngSubmit)="calculate()" (submit)="$event.preventDefault()">
       <div class="chip__cell">
         <label for="chip-brand">Marka</label>
         <div class="chip__control">
-          <select
-            id="chip-brand"
-            [value]="brand()"
-            (change)="onBrand($any($event.target).value)"
-          >
+          <select id="chip-brand" [value]="brand()" (change)="onBrand($any($event.target).value)">
             <option value="">Seçiniz</option>
             @for (b of catalog; track b.name) {
               <option [value]="b.name">{{ b.name }}</option>
@@ -24,12 +22,7 @@
       <div class="chip__cell" [class.is-disabled]="!brand()">
         <label for="chip-model">Model</label>
         <div class="chip__control">
-          <select
-            id="chip-model"
-            [value]="model()"
-            (change)="onModel($any($event.target).value)"
-            [disabled]="!brand()"
-          >
+          <select id="chip-model" [value]="model()" (change)="onModel($any($event.target).value)" [disabled]="!brand()">
             <option value="">Seçiniz</option>
             @for (m of models(); track m.name) {
               <option [value]="m.name">{{ m.name }}</option>
@@ -42,12 +35,7 @@
       <div class="chip__cell" [class.is-disabled]="!model()">
         <label for="chip-series">Seri</label>
         <div class="chip__control">
-          <select
-            id="chip-series"
-            [value]="series()"
-            (change)="onSeries($any($event.target).value)"
-            [disabled]="!model()"
-          >
+          <select id="chip-series" [value]="series()" (change)="onSeries($any($event.target).value)" [disabled]="!model()">
             <option value="">Seçiniz</option>
             @for (s of seriesList(); track s.name) {
               <option [value]="s.name">{{ s.name }}</option>
@@ -60,12 +48,7 @@
       <div class="chip__cell" [class.is-disabled]="!series()">
         <label for="chip-engine">Motor</label>
         <div class="chip__control">
-          <select
-            id="chip-engine"
-            [value]="engine()"
-            (change)="onEngine($any($event.target).value)"
-            [disabled]="!series()"
-          >
+          <select id="chip-engine" [value]="engine()" (change)="onEngine($any($event.target).value)" [disabled]="!series()">
             <option value="">Seçiniz</option>
             @for (e of engines(); track e.engine) {
               <option [value]="e.engine">{{ e.engine }}</option>
@@ -75,17 +58,13 @@
         </div>
       </div>
 
-      <button
-        type="submit"
-        class="chip__go"
-        [disabled]="!canSubmit()"
-        aria-label="Hesapla"
-      >
+      <button type="button" class="chip__go" [disabled]="!canSubmit()" (click)="calculate()" aria-label="Hesapla">
         <span>Hesapla</span>
         <i class="pi pi-arrow-right" aria-hidden="true"></i>
       </button>
     </form>
 
+    <!-- ─── Section header ─── -->
     <header class="chip__head">
       <span class="chip__accent" aria-hidden="true"></span>
       <p class="chip__eyebrow">1120+ Marka ve Modelde Hesaplayın</p>
@@ -100,42 +79,138 @@
       </p>
     }
 
-    @if (result(); as r) {
-      <article class="chip__result" aria-live="polite">
-        <header class="chip__result-head">
-          <p class="chip__result-eyebrow">Stage 1 Tahmini Kazanım</p>
-          <h3 class="chip__result-title">{{ brand() }} {{ model() }} · {{ r.engine }}</h3>
-        </header>
-
-        <div class="chip__result-grid">
-          <div class="chip__metric">
-            <span class="chip__metric-lbl">Beygir</span>
-            <span class="chip__metric-row">
-              <span class="chip__metric-num">{{ r.stockHp }}</span>
-              <i class="pi pi-arrow-right chip__metric-arrow"></i>
-              <span class="chip__metric-num chip__metric-num--up">{{ r.tunedHp }}</span>
-              <span class="chip__metric-delta">+{{ hpGain(r) }} HP</span>
-            </span>
-          </div>
-
-          <div class="chip__metric">
-            <span class="chip__metric-lbl">Tork</span>
-            <span class="chip__metric-row">
-              <span class="chip__metric-num">{{ r.stockTq }}</span>
-              <i class="pi pi-arrow-right chip__metric-arrow"></i>
-              <span class="chip__metric-num chip__metric-num--up">{{ r.tunedTq }}</span>
-              <span class="chip__metric-delta">+{{ tqGain(r) }} Nm</span>
-            </span>
-          </div>
-        </div>
-
-        <footer class="chip__result-foot">
-          <p>Net rakamlar dyno testi sonrası belirlenir. Detaylı teklif için iletişime geç.</p>
-          <button type="button" class="chip__reset" (click)="reset()">
-            <i class="pi pi-refresh"></i> Yeniden Hesapla
-          </button>
-        </footer>
-      </article>
-    }
   </div>
 </section>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  RESULT MODAL                                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+@if (showModal() && result(); as r) {
+  <!-- Backdrop -->
+  <div class="cm-backdrop" (click)="closeModal()" aria-hidden="true"></div>
+
+  <!-- Panel -->
+  <div class="cm" role="dialog" aria-modal="true" aria-labelledby="cm-title">
+
+    <!-- Header -->
+    <div class="cm__head">
+      <div class="cm__head-left">
+        <span class="cm__brand-pill">{{ brand() }}</span>
+        <h3 id="cm-title" class="cm__title">{{ brand() }} {{ model() }} · {{ series() }}</h3>
+        <p class="cm__engine-line">
+          <span class="cm__engine-code">{{ r.engineCode }}</span>
+          {{ r.displacementCc | number }} cc · {{ r.fuel }}
+        </p>
+      </div>
+      <button class="cm__close" (click)="closeModal()" aria-label="Kapat">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Engine Specs Row -->
+    <div class="cm__specs">
+      <div class="cm__spec">
+        <span class="cm__spec-k">Motor Kodu</span>
+        <span class="cm__spec-v cm__spec-v--code">{{ r.engineCode }}</span>
+      </div>
+      <div class="cm__spec">
+        <span class="cm__spec-k">Silindir Hacmi</span>
+        <span class="cm__spec-v">{{ r.displacementCc | number }} cc</span>
+      </div>
+      <div class="cm__spec">
+        <span class="cm__spec-k">Bore × Stroke</span>
+        <span class="cm__spec-v">{{ r.bore }}</span>
+      </div>
+      <div class="cm__spec">
+        <span class="cm__spec-k">Sıkıştırma</span>
+        <span class="cm__spec-v">{{ r.compressionRatio }}</span>
+      </div>
+      <div class="cm__spec">
+        <span class="cm__spec-k">ECU</span>
+        <span class="cm__spec-v">{{ r.ecu }}</span>
+      </div>
+      <div class="cm__spec">
+        <span class="cm__spec-k">Yakıt</span>
+        <span class="cm__spec-v">
+          <span class="cm__fuel cm__fuel--{{ fuelClass(r.fuel) }}">{{ r.fuel }}</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Stage Comparison Table -->
+    <div class="cm__stages">
+      <div class="cm__stages-head">
+        <span>Yazılım Seviyesi</span>
+        <span>Beygir (HP)</span>
+        <span>Tork (Nm)</span>
+        <span>HP +</span>
+        <span>Nm +</span>
+      </div>
+
+      <!-- Stock -->
+      <div class="cm__stage-row cm__stage-row--stock">
+        <span class="cm__stage-name">Orjinal</span>
+        <span class="cm__stage-val">{{ r.stockHp }}</span>
+        <span class="cm__stage-val">{{ r.stockTq }}</span>
+        <span class="cm__stage-delta">—</span>
+        <span class="cm__stage-delta">—</span>
+      </div>
+
+      <!-- Stage 1 -->
+      <div class="cm__stage-row cm__stage-row--s1">
+        <span class="cm__stage-name">
+          <span class="cm__stage-badge cm__stage-badge--blue">Stage 1</span>
+        </span>
+        <span class="cm__stage-val cm__stage-val--lit">{{ r.stage1Hp }}</span>
+        <span class="cm__stage-val cm__stage-val--lit">{{ r.stage1Tq }}</span>
+        <span class="cm__stage-delta cm__stage-delta--green">+{{ r.stage1Hp - r.stockHp }}</span>
+        <span class="cm__stage-delta cm__stage-delta--green">+{{ r.stage1Tq - r.stockTq }}</span>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="cm__stage-row cm__stage-row--s2">
+        <span class="cm__stage-name">
+          <span class="cm__stage-badge cm__stage-badge--red">Stage 2</span>
+        </span>
+        <span class="cm__stage-val cm__stage-val--lit">{{ r.stage2Hp }}</span>
+        <span class="cm__stage-val cm__stage-val--lit">{{ r.stage2Tq }}</span>
+        <span class="cm__stage-delta cm__stage-delta--green">+{{ r.stage2Hp - r.stockHp }}</span>
+        <span class="cm__stage-delta cm__stage-delta--green">+{{ r.stage2Tq - r.stockTq }}</span>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="cm__stage-row cm__stage-row--s3">
+        <span class="cm__stage-name">
+          <span class="cm__stage-badge cm__stage-badge--purple">Stage 3</span>
+        </span>
+        <span class="cm__stage-val cm__stage-val--lit">{{ r.stage3Hp }}</span>
+        <span class="cm__stage-val cm__stage-val--lit">{{ r.stage3Tq }}</span>
+        <span class="cm__stage-delta cm__stage-delta--green">+{{ r.stage3Hp - r.stockHp }}</span>
+        <span class="cm__stage-delta cm__stage-delta--green">+{{ r.stage3Tq - r.stockTq }}</span>
+      </div>
+    </div>
+
+    <!-- CTA Footer -->
+    <div class="cm__footer">
+      <p class="cm__footer-note">
+        <i class="pi pi-info-circle"></i>
+        Net rakamlar dyno testi sonrası belirlenir. Sipariş vermek veya detaylı teklif almak için giriş yapın.
+      </p>
+      <div class="cm__footer-btns">
+        <a routerLink="/login" class="cm__btn cm__btn--primary" (click)="closeModal()">
+          <i class="pi pi-sign-in"></i>
+          Giriş Yap
+        </a>
+        <a routerLink="/login" [queryParams]="{ register: '1' }" class="cm__btn cm__btn--outline" (click)="closeModal()">
+          <i class="pi pi-user-plus"></i>
+          Ücretsiz Kayıt Ol
+        </a>
+        <button class="cm__btn cm__btn--ghost" type="button" (click)="reset()">
+          <i class="pi pi-refresh"></i>
+          Yeniden Hesapla
+        </button>
+      </div>
+    </div>
+
+  </div>
+}

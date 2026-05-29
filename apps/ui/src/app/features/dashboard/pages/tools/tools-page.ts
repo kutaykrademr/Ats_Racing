@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 /* ─── TYPES ─────────────────────────────────────────── */
 type TabKey = 'module' | 'tuning';
@@ -18,9 +19,13 @@ interface Engine {
   stage1: { hp: number; torque: number };
   stage2: { hp: number; torque: number };
   stage3: { hp: number; torque: number };
+  engineCode: string;
   displacement: string;
+  displacementCc: number;
+  bore: string;
+  compressionRatio: string;
   ecu: string;
-  fuel: string;
+  fuel: 'Benzin' | 'Dizel' | 'Hibrit';
   year: string;
 }
 interface CarSeries { label: string; engines: Engine[]; }
@@ -62,48 +67,56 @@ const CATALOG: Brand[] = [
   { label: 'BMW', models: [
     { label: 'M3', series: [
       { label: 'F80 (2014–2018)', engines: [
-        { label: 'S55B30 3.0T', stock: { hp: 431, torque: 550 }, stage1: { hp: 500, torque: 620 }, stage2: { hp: 560, torque: 680 }, stage3: { hp: 640, torque: 780 }, displacement: '3.0L Twin Turbo', ecu: 'Bosch MG1CS001', fuel: 'Benzin', year: '2014–2018' },
+        { label: 'S55B30 3.0T', stock: { hp: 431, torque: 550 }, stage1: { hp: 500, torque: 620 }, stage2: { hp: 560, torque: 680 }, stage3: { hp: 640, torque: 780 },
+          engineCode: 'S55B30', displacement: '3.0L Twin Turbo', displacementCc: 2979, bore: '84.0 × 89.6 mm', compressionRatio: '10.2:1', ecu: 'Bosch MG1CS001', fuel: 'Benzin', year: '2014–2018' },
       ]},
       { label: 'G80 (2021–)', engines: [
-        { label: 'S58B30 3.0T', stock: { hp: 510, torque: 650 }, stage1: { hp: 580, torque: 730 }, stage2: { hp: 650, torque: 820 }, stage3: { hp: 730, torque: 920 }, displacement: '3.0L Twin Turbo', ecu: 'Bosch MG1CS024', fuel: 'Benzin', year: '2021–' },
+        { label: 'S58B30 3.0T', stock: { hp: 510, torque: 650 }, stage1: { hp: 580, torque: 730 }, stage2: { hp: 650, torque: 820 }, stage3: { hp: 730, torque: 920 },
+          engineCode: 'S58B30', displacement: '3.0L Twin Turbo', displacementCc: 2993, bore: '84.0 × 90.0 mm', compressionRatio: '10.2:1', ecu: 'Bosch MG1CS024', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
     { label: 'M5', series: [
       { label: 'F90 (2018–)', engines: [
-        { label: 'S63B44 4.4T', stock: { hp: 600, torque: 750 }, stage1: { hp: 680, torque: 840 }, stage2: { hp: 750, torque: 920 }, stage3: { hp: 850, torque: 1020 }, displacement: '4.4L V8 TT', ecu: 'Bosch MED17', fuel: 'Benzin', year: '2018–' },
+        { label: 'S63B44 4.4T', stock: { hp: 600, torque: 750 }, stage1: { hp: 680, torque: 840 }, stage2: { hp: 750, torque: 920 }, stage3: { hp: 850, torque: 1020 },
+          engineCode: 'S63B44', displacement: '4.4L V8 TT', displacementCc: 4395, bore: '89.0 × 88.3 mm', compressionRatio: '10.5:1', ecu: 'Bosch MED17.2', fuel: 'Benzin', year: '2018–' },
       ]},
     ]},
   ]},
   { label: 'Audi', models: [
     { label: 'RS6', series: [
       { label: 'C8 (2020–)', engines: [
-        { label: 'DKCE 4.0 TFSI', stock: { hp: 600, torque: 800 }, stage1: { hp: 680, torque: 880 }, stage2: { hp: 760, torque: 960 }, stage3: { hp: 860, torque: 1080 }, displacement: '4.0L V8 TT', ecu: 'Bosch MG1', fuel: 'Benzin', year: '2020–' },
+        { label: 'DKCE 4.0 TFSI', stock: { hp: 600, torque: 800 }, stage1: { hp: 680, torque: 880 }, stage2: { hp: 760, torque: 960 }, stage3: { hp: 860, torque: 1080 },
+          engineCode: 'DKCE', displacement: '4.0L V8 TT', displacementCc: 3996, bore: '84.5 × 89.0 mm', compressionRatio: '9.8:1', ecu: 'Bosch MG1CS002', fuel: 'Benzin', year: '2020–' },
       ]},
     ]},
     { label: 'S3', series: [
       { label: '8Y (2021–)', engines: [
-        { label: 'DKZ 2.0 TFSI', stock: { hp: 310, torque: 400 }, stage1: { hp: 370, torque: 470 }, stage2: { hp: 430, torque: 530 }, stage3: { hp: 490, torque: 600 }, displacement: '2.0L Turbo', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
+        { label: 'DKZ 2.0 TFSI', stock: { hp: 310, torque: 400 }, stage1: { hp: 370, torque: 470 }, stage2: { hp: 430, torque: 530 }, stage3: { hp: 490, torque: 600 },
+          engineCode: 'DKZ', displacement: '2.0L Turbo', displacementCc: 1984, bore: '82.5 × 92.8 mm', compressionRatio: '10.5:1', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
   ]},
   { label: 'Mercedes', models: [
     { label: 'C63 AMG', series: [
       { label: 'W205 (2015–2021)', engines: [
-        { label: 'M177 4.0T', stock: { hp: 476, torque: 650 }, stage1: { hp: 560, torque: 730 }, stage2: { hp: 630, torque: 810 }, stage3: { hp: 720, torque: 920 }, displacement: '4.0L V8 TT', ecu: 'Bosch MED17', fuel: 'Benzin', year: '2015–2021' },
+        { label: 'M177 4.0T', stock: { hp: 476, torque: 650 }, stage1: { hp: 560, torque: 730 }, stage2: { hp: 630, torque: 810 }, stage3: { hp: 720, torque: 920 },
+          engineCode: 'M177', displacement: '4.0L V8 TT', displacementCc: 3982, bore: '83.0 × 92.0 mm', compressionRatio: '10.5:1', ecu: 'Bosch MED17.7.2', fuel: 'Benzin', year: '2015–2021' },
       ]},
     ]},
   ]},
   { label: 'VW', models: [
     { label: 'Golf R', series: [
       { label: 'Mk8 (2021–)', engines: [
-        { label: 'DKZ 2.0 TSI', stock: { hp: 320, torque: 420 }, stage1: { hp: 380, torque: 490 }, stage2: { hp: 440, torque: 560 }, stage3: { hp: 510, torque: 640 }, displacement: '2.0L Turbo', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
+        { label: 'DKZ 2.0 TSI', stock: { hp: 320, torque: 420 }, stage1: { hp: 380, torque: 490 }, stage2: { hp: 440, torque: 560 }, stage3: { hp: 510, torque: 640 },
+          engineCode: 'DKZ', displacement: '2.0L Turbo', displacementCc: 1984, bore: '82.5 × 92.8 mm', compressionRatio: '10.5:1', ecu: 'Bosch MG1CS011', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
   ]},
   { label: 'Porsche', models: [
     { label: '911', series: [
       { label: 'Turbo S 992 (2021–)', engines: [
-        { label: '9A2.51 3.8T', stock: { hp: 650, torque: 800 }, stage1: { hp: 730, torque: 890 }, stage2: { hp: 820, torque: 980 }, stage3: { hp: 920, torque: 1100 }, displacement: '3.8L Flat-6 TT', ecu: 'Bosch ME9.8', fuel: 'Benzin', year: '2021–' },
+        { label: '9A2.51 3.8T', stock: { hp: 650, torque: 800 }, stage1: { hp: 730, torque: 890 }, stage2: { hp: 820, torque: 980 }, stage3: { hp: 920, torque: 1100 },
+          engineCode: '9A2.51', displacement: '3.8L Flat-6 TT', displacementCc: 3745, bore: '91.0 × 76.4 mm', compressionRatio: '9.8:1', ecu: 'Bosch ME9.8', fuel: 'Benzin', year: '2021–' },
       ]},
     ]},
   ]},
@@ -120,7 +133,7 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
 @Component({
   selector: 'app-tools-page',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="tp">
@@ -341,14 +354,34 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
                 <h2 class="step-card__title">Araç Seçimi</h2>
                 <p class="step-card__sub">Aracınızı seçin ve yazılım seviyesini belirleyin</p>
               </div>
+              <div class="step-card__actions">
+                <button class="ghost-btn ghost-btn--danger" type="button" (click)="resetAll()"
+                  [disabled]="!selBrand() && !selVehicleType() && !selYear() && !selTransmission() && !selKm() && !selPlate()">
+                  <i class="pi pi-refresh"></i> Temizle
+                </button>
+              </div>
             </div>
 
             <div class="vehicle-row">
+
+              <!-- ROW 1: Marka Türü | Marka | Model -->
+              <div class="sel-group">
+                <label class="sel-label" for="t-vtype">Marka Türü</label>
+                <div class="sel-wrap">
+                  <select id="t-vtype" class="sel" [(ngModel)]="selVehicleTypeVal" (ngModelChange)="selVehicleType.set($event)">
+                    <option value="">— Tür Seçin —</option>
+                    @for (vt of vehicleTypeOptions; track vt) {
+                      <option [value]="vt">{{ vt }}</option>
+                    }
+                  </select>
+                  <i class="pi pi-chevron-down sel-arrow"></i>
+                </div>
+              </div>
               <div class="sel-group">
                 <label class="sel-label" for="t-brand">Marka</label>
                 <div class="sel-wrap">
-                  <select id="t-brand" class="sel" (change)="onBrand($event)">
-                    <option value="">— Marka —</option>
+                  <select id="t-brand" class="sel" [value]="selBrand()" (change)="onBrand($event)">
+                    <option value="">— Marka Seçin —</option>
                     @for (b of catalog; track b.label) {
                       <option [value]="b.label">{{ b.label }}</option>
                     }
@@ -359,8 +392,8 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
               <div class="sel-group">
                 <label class="sel-label" for="t-model">Model</label>
                 <div class="sel-wrap">
-                  <select id="t-model" class="sel" [disabled]="!selBrand()" (change)="onModel($event)">
-                    <option value="">— Model —</option>
+                  <select id="t-model" class="sel" [value]="selModel()" [disabled]="!selBrand()" (change)="onModel($event)">
+                    <option value="">— Model Seçin —</option>
                     @for (m of availableModels(); track m.label) {
                       <option [value]="m.label">{{ m.label }}</option>
                     }
@@ -368,11 +401,13 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
                   <i class="pi pi-chevron-down sel-arrow"></i>
                 </div>
               </div>
+
+              <!-- ROW 2: Nesil | Motor | ECU -->
               <div class="sel-group">
-                <label class="sel-label" for="t-series">Seri / Yıl</label>
+                <label class="sel-label" for="t-series">Nesil</label>
                 <div class="sel-wrap">
-                  <select id="t-series" class="sel" [disabled]="!selModel()" (change)="onSeries($event)">
-                    <option value="">— Seri —</option>
+                  <select id="t-series" class="sel" [value]="selSeries()" [disabled]="!selModel()" (change)="onSeries($event)">
+                    <option value="">— Nesil Seçin —</option>
                     @for (s of availableSeries(); track s.label) {
                       <option [value]="s.label">{{ s.label }}</option>
                     }
@@ -383,8 +418,8 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
               <div class="sel-group">
                 <label class="sel-label" for="t-engine">Motor</label>
                 <div class="sel-wrap">
-                  <select id="t-engine" class="sel" [disabled]="!selSeries()" (change)="onEngine($event)">
-                    <option value="">— Motor —</option>
+                  <select id="t-engine" class="sel" [value]="selEngineName()" [disabled]="!selSeries()" (change)="onEngine($event)">
+                    <option value="">— Motoru Seçin —</option>
                     @for (e of availableEngines(); track e.label) {
                       <option [value]="e.label">{{ e.label }}</option>
                     }
@@ -392,9 +427,117 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
                   <i class="pi pi-chevron-down sel-arrow"></i>
                 </div>
               </div>
+              <div class="sel-group">
+                <label class="sel-label" for="t-ecu">ECU</label>
+                <div class="sel-wrap">
+                  <select id="t-ecu" class="sel" [disabled]="!selEngineName()" [(ngModel)]="selEcuVal" (ngModelChange)="selEcu.set($event)">
+                    <option value="">— ECU'yu Seçin —</option>
+                    @for (ec of availableEcuOptions(); track ec) {
+                      <option [value]="ec">{{ ec }}</option>
+                    }
+                  </select>
+                  <i class="pi pi-chevron-down sel-arrow"></i>
+                </div>
+              </div>
+
+              <!-- ROW 3: Yıl | Şanzıman | Kilometre -->
+              <div class="sel-group">
+                <label class="sel-label" for="t-year">Yıl</label>
+                <div class="sel-wrap">
+                  <select id="t-year" class="sel" [(ngModel)]="selYearVal" (ngModelChange)="selYear.set($event)">
+                    <option value="">— Yıl Seçin —</option>
+                    @for (y of yearOptions; track y) {
+                      <option [value]="y">{{ y }}</option>
+                    }
+                  </select>
+                  <i class="pi pi-chevron-down sel-arrow"></i>
+                </div>
+              </div>
+              <div class="sel-group">
+                <label class="sel-label" for="t-transmission">Şanzıman</label>
+                <div class="sel-wrap">
+                  <select id="t-transmission" class="sel" [(ngModel)]="selTransmissionVal" (ngModelChange)="selTransmission.set($event)">
+                    <option value="">— Vites Kutusunu Seçin —</option>
+                    @for (t of transmissionOptions; track t) {
+                      <option [value]="t">{{ t }}</option>
+                    }
+                  </select>
+                  <i class="pi pi-chevron-down sel-arrow"></i>
+                </div>
+              </div>
+              <div class="sel-group">
+                <label class="sel-label" for="t-km">Kilometre</label>
+                <div class="input-wrap">
+                  <input id="t-km" class="text-input" type="number" placeholder="Ör: 45000" min="0"
+                    [(ngModel)]="selKmVal" (ngModelChange)="selKm.set($event)" />
+                  <span class="input-suffix">km</span>
+                </div>
+              </div>
+
+              <!-- ROW 4: Plaka (tek kolon) -->
+              <div class="sel-group">
+                <label class="sel-label" for="t-plate">Plaka</label>
+                <input id="t-plate" class="text-input" type="text" placeholder="Ör: 34 ABC 123"
+                  style="text-transform:uppercase"
+                  [(ngModel)]="selPlateVal" (ngModelChange)="selPlate.set($event)" />
+              </div>
+
             </div>
 
+            <!-- AUTO-FILL ENGINE INFO STRIP -->
             @if (selEngine()) {
+              <div class="engine-info-strip">
+                <div class="engine-info-item">
+                  <span class="engine-info-k">Motor Kodu</span>
+                  <span class="engine-info-v engine-info-v--code">{{ selEngine()!.engineCode }}</span>
+                </div>
+                <div class="engine-info-sep"></div>
+                <div class="engine-info-item">
+                  <span class="engine-info-k">Silindir Hacmi</span>
+                  <span class="engine-info-v">{{ selEngine()!.displacementCc | number }} cc</span>
+                </div>
+                <div class="engine-info-sep"></div>
+                <div class="engine-info-item">
+                  <span class="engine-info-k">Bore × Stroke</span>
+                  <span class="engine-info-v">{{ selEngine()!.bore }}</span>
+                </div>
+                <div class="engine-info-sep"></div>
+                <div class="engine-info-item">
+                  <span class="engine-info-k">Sıkıştırma</span>
+                  <span class="engine-info-v">{{ selEngine()!.compressionRatio }}</span>
+                </div>
+                <div class="engine-info-sep"></div>
+                <div class="engine-info-item">
+                  <span class="engine-info-k">Yakıt</span>
+                  <span class="engine-info-v">
+                    <span class="fuel-badge fuel-badge--{{ selEngine()!.fuel === 'Benzin' ? 'petrol' : selEngine()!.fuel === 'Dizel' ? 'diesel' : 'hybrid' }}">
+                      {{ selEngine()!.fuel }}
+                    </span>
+                  </span>
+                </div>
+                <div class="engine-info-sep"></div>
+                <div class="engine-info-item">
+                  <span class="engine-info-k">ECU</span>
+                  <span class="engine-info-v">{{ selEngine()!.ecu }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Eksik alan uyarısı — motor seçildi ama zorunlu alanlar eksik -->
+            @if (selEngine() && !allFieldsFilled()) {
+              <div class="fields-hint">
+                <i class="pi pi-info-circle"></i>
+                Yazılım seviyesini görmek için tüm zorunlu alanları doldurun:
+                @if (!selVehicleType()) { <span class="fields-hint__tag">Marka Türü</span> }
+                @if (!selEcu()) { <span class="fields-hint__tag">ECU</span> }
+                @if (!selYear()) { <span class="fields-hint__tag">Yıl</span> }
+                @if (!selTransmission()) { <span class="fields-hint__tag">Şanzıman</span> }
+                @if (!selKm()) { <span class="fields-hint__tag">Kilometre</span> }
+                @if (!selPlate()) { <span class="fields-hint__tag">Plaka</span> }
+              </div>
+            }
+
+            @if (allFieldsFilled()) {
               <div class="tune-opts">
                 <p class="sel-label" style="margin-bottom:0.75rem">Yazılım Seviyesi</p>
                 <div class="tune-opts__grid">
@@ -436,21 +579,40 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
                   </button>
                 </div>
               </div>
-            }
 
-            <button
-              class="cta-btn cta-btn--primary"
-              style="margin-top:1.5rem; width:fit-content"
-              type="button"
-              [disabled]="!canCalculate()"
-              (click)="calculate()"
-            >
-              <i class="pi pi-bolt"></i> Hesapla
-            </button>
+              <button
+                class="cta-btn cta-btn--primary"
+                style="margin-top:1.5rem; width:fit-content"
+                type="button"
+                (click)="calculate()"
+              >
+                <i class="pi pi-bolt"></i> Hesapla
+              </button>
+            }
           </div>
 
-          <!-- RESULT -->
+          <!-- RESULT + CHECKOUT — tek iki-kolon layout -->
           @if (tuningResult()) {
+            <div class="checkout-layout">
+
+              <!-- ── LEFT: result + steps ── -->
+              <div class="checkout-steps">
+
+            @if (orderSent()) {
+              <div class="order-success">
+                <div class="order-success__icon"><i class="pi pi-check-circle"></i></div>
+                <div class="order-success__body">
+                  <h3>Siparişiniz Alındı!</h3>
+                  <p>
+                    {{ tuneLabel() }} yazılım siparişiniz
+                    @if (selectedModules().size > 0) { <span>ve {{ selectedModules().size }} ekstra modül</span> }
+                    ekibimize iletildi. Hazırlık tamamlanınca e-posta ile bilgilendirileceksiniz.
+                  </p>
+                </div>
+                <button class="ghost-btn" (click)="resetOrder()" type="button">Yeni Sipariş</button>
+              </div>
+            }
+
             <div class="result-wrap">
 
               <div class="result-banner">
@@ -458,7 +620,8 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
                   <div class="result-badge">{{ selBrand() }}</div>
                   <h2 class="result-banner__name">{{ selBrand() }} {{ selModel() }}</h2>
                   <p class="result-banner__meta">
-                    {{ tuningResult()!.displacement }} · {{ tuningResult()!.ecu }} · {{ tuningResult()!.fuel }} · {{ tuningResult()!.year }}
+                    <span class="result-banner__code">{{ tuningResult()!.engineCode }}</span>
+                    · {{ tuningResult()!.displacement }} · {{ tuningResult()!.fuel }} · {{ tuningResult()!.year }}
                   </p>
                 </div>
                 <div class="result-banner__tag">{{ tuneLabel() }}</div>
@@ -586,176 +749,441 @@ const TUNING_PRICES: Record<'stage1' | 'stage2' | 'stage3', number> = {
               <div class="detail-card">
                 <h3 class="gauge-card__title">Teknik Detaylar</h3>
                 <div class="detail-grid">
-                  <div class="detail-item"><span class="detail-item__k">Motor Hacmi</span><span class="detail-item__v">{{ tuningResult()!.displacement }}</span></div>
-                  <div class="detail-item"><span class="detail-item__k">ECU</span><span class="detail-item__v">{{ tuningResult()!.ecu }}</span></div>
-                  <div class="detail-item"><span class="detail-item__k">Yakıt</span><span class="detail-item__v">{{ tuningResult()!.fuel }}</span></div>
-                  <div class="detail-item"><span class="detail-item__k">Üretim Yılı</span><span class="detail-item__v">{{ tuningResult()!.year }}</span></div>
-                  <div class="detail-item"><span class="detail-item__k">HP Artışı</span><span class="detail-item__v detail-item__v--green">+{{ tunedHp() - tuningResult()!.stock.hp }} HP (%{{ hpPct() }})</span></div>
-                  <div class="detail-item"><span class="detail-item__k">Tork Artışı</span><span class="detail-item__v detail-item__v--green">+{{ tunedTorque() - tuningResult()!.stock.torque }} Nm</span></div>
-                </div>
-              </div>
-
-            </div>
-          }
-
-          <!-- ════ POST-RESULT FLOW: file upload + add-on modules + checkout ════ -->
-          @if (tuningResult()) {
-
-            <!-- STEP 2 — FILE UPLOAD -->
-            <div class="step-card">
-              <div class="step-card__head">
-                <div class="step-num">2</div>
-                <div>
-                  <h2 class="step-card__title">Orijinal Dosyanı Yükle</h2>
-                  <p class="step-card__sub">Ekibimiz yazılımı kişiselleştirebilmek için aracınızdan okunan orijinal ECU dosyasına ihtiyaç duyar</p>
-                </div>
-              </div>
-
-              <div
-                class="upload-zone"
-                [class.upload-zone--drag]="isDragging()"
-                [class.upload-zone--filled]="uploadedFile()"
-                (dragover)="onDragOver($event)"
-                (dragleave)="isDragging.set(false)"
-                (drop)="onDrop($event)"
-              >
-                @if (!uploadedFile()) {
-                  <div class="upload-zone__inner">
-                    <div class="upload-zone__icon">
-                      <i class="pi pi-cloud-upload"></i>
-                    </div>
-                    <p class="upload-zone__title">Orijinal ECU Dosyasını Sürükle & Bırak</p>
-                    <p class="upload-zone__hint">.bin · .ori · .hex · .kess · .ktag formatları desteklenir</p>
-                    <label class="upload-zone__btn">
-                      <i class="pi pi-folder-open"></i> Dosya Seç
-                      <input
-                        type="file"
-                        accept=".bin,.ori,.hex,.mod,.kess,.ktag"
-                        (change)="onFileSelect($event)"
-                        style="display:none"
-                      />
-                    </label>
+                  <div class="detail-item">
+                    <span class="detail-item__k">Motor Kodu</span>
+                    <span class="detail-item__v detail-item__v--code">{{ tuningResult()!.engineCode }}</span>
                   </div>
-                } @else {
-                  <div class="upload-file-info">
-                    <div class="upload-file-info__icon">
-                      <i class="pi pi-file"></i>
-                    </div>
-                    <div class="upload-file-info__body">
-                      <span class="upload-file-info__name">{{ uploadedFile()!.name }}</span>
-                      <span class="upload-file-info__meta">{{ formatSize(uploadedFile()!.size) }} · Hazır</span>
-                    </div>
-                    <button class="upload-file-info__remove" (click)="uploadedFile.set(null)" type="button" aria-label="Dosyayı kaldır">
-                      <i class="pi pi-times"></i>
-                    </button>
+                  <div class="detail-item">
+                    <span class="detail-item__k">Silindir Hacmi</span>
+                    <span class="detail-item__v">{{ tuningResult()!.displacementCc | number }} cc</span>
                   </div>
-                }
+                  <div class="detail-item">
+                    <span class="detail-item__k">Bore × Stroke</span>
+                    <span class="detail-item__v">{{ tuningResult()!.bore }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__k">Sıkıştırma Oranı</span>
+                    <span class="detail-item__v">{{ tuningResult()!.compressionRatio }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__k">Yakıt Tipi</span>
+                    <span class="detail-item__v">
+                      <span class="fuel-badge fuel-badge--{{ tuningResult()!.fuel === 'Benzin' ? 'petrol' : tuningResult()!.fuel === 'Dizel' ? 'diesel' : 'hybrid' }}">
+                        {{ tuningResult()!.fuel }}
+                      </span>
+                    </span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__k">ECU</span>
+                    <span class="detail-item__v">{{ tuningResult()!.ecu }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__k">Üretim Yılı</span>
+                    <span class="detail-item__v">{{ tuningResult()!.year }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__k">HP Artışı</span>
+                    <span class="detail-item__v detail-item__v--green">+{{ tunedHp() - tuningResult()!.stock.hp }} HP (%{{ hpPct() }})</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-item__k">Tork Artışı</span>
+                    <span class="detail-item__v detail-item__v--green">+{{ tunedTorque() - tuningResult()!.stock.torque }} Nm</span>
+                  </div>
+                </div>
               </div>
 
-              <p class="upload-hint-note">
-                <i class="pi pi-info-circle"></i>
-                Dosyanız yoksa "Uzmanla Konuş" butonundan destek ekibimize ulaşabilirsiniz.
-              </p>
-            </div>
+            </div><!-- /result-wrap -->
 
-            <!-- STEP 3 — OPTIONAL ADD-ON MODULES -->
-            <div class="step-card">
-              <div class="step-card__head">
-                <div class="step-num">3</div>
-                <div>
-                  <h2 class="step-card__title">Ekstra Modüller <span class="optional-pill">Opsiyonel</span></h2>
-                  <p class="step-card__sub">Yazılımınıza eklemek istediğiniz modülleri seçin. Boş bırakırsanız sadece chip tuning siparişi oluşturulur.</p>
-                </div>
-                <div class="step-card__actions">
-                  <button class="ghost-btn ghost-btn--danger" (click)="clearAll()" type="button" [disabled]="selectedModules().size === 0">Temizle</button>
-                </div>
-              </div>
+                <!-- ADIM KARTLARI -->
 
-              @for (group of groups; track group) {
-                <div class="mod-group">
-                  <h3 class="mod-group__title">{{ group }}</h3>
-                  <div class="mod-grid">
-                    @for (mod of modulesByGroup(group); track mod.key) {
-                      <button
-                        class="mod-tile"
-                        [class.mod-tile--on]="isSelected(mod.key)"
-                        (click)="toggleModule(mod.key)"
-                        type="button"
-                      >
-                        <div class="mod-tile__top">
-                          <span class="mod-tile__label">{{ mod.label }}</span>
-                          <span class="mod-indicator" [class.mod-indicator--on]="isSelected(mod.key)">
-                            {{ isSelected(mod.key) ? 'ON' : 'OFF' }}
-                          </span>
+                <!-- STEP 2 — AYARLAMA BİLGİLERİ -->
+                <div class="step-card">
+                  <div class="step-card__head">
+                    <div class="step-num">2</div>
+                    <div>
+                      <h2 class="step-card__title">Ayarlama Bilgileri</h2>
+                      <p class="step-card__sub">Lütfen aşağıdaki tüm bilgileri doldurun</p>
+                    </div>
+                  </div>
+
+                  <div class="vehicle-row">
+                    <!-- Row 1: Okuma Aracı | Okuma Türü | VIN -->
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-reading-tool">Okuma Aracı</label>
+                      <div class="sel-wrap">
+                        <select id="t-reading-tool" class="sel" [(ngModel)]="selReadingToolVal" (ngModelChange)="selReadingTool.set($event)">
+                          <option value="">— Seçin —</option>
+                          @for (rt of readingToolOptions; track rt) {
+                            <option [value]="rt">{{ rt }}</option>
+                          }
+                        </select>
+                        <i class="pi pi-chevron-down sel-arrow"></i>
+                      </div>
+                    </div>
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-virtual-file">Okuma Türü (Sanal Dosya)</label>
+                      <div class="sel-wrap">
+                        <select id="t-virtual-file" class="sel" [(ngModel)]="selVirtualFileVal" (ngModelChange)="selVirtualFile.set($event)">
+                          <option value="">— Seçin —</option>
+                          <option value="HAYIR">HAYIR</option>
+                          <option value="EVET">EVET</option>
+                        </select>
+                        <i class="pi pi-chevron-down sel-arrow"></i>
+                      </div>
+                    </div>
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-vin">VIN</label>
+                      <input id="t-vin" class="text-input" type="text" placeholder="WBA..." style="text-transform:uppercase"
+                        [(ngModel)]="selVinVal" (ngModelChange)="selVin.set($event)" />
+                    </div>
+                    <!-- Row 2: ECU Donanım | ECU Parça | ECU Yazılım -->
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-ecu-hw">ECU Donanım Numarası</label>
+                      <input id="t-ecu-hw" class="text-input" type="text" placeholder="0281…"
+                        [(ngModel)]="selEcuHwVal" (ngModelChange)="selEcuHw.set($event)" />
+                    </div>
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-ecu-part">ECU Parça Numarası</label>
+                      <input id="t-ecu-part" class="text-input" type="text" placeholder="03L…"
+                        [(ngModel)]="selEcuPartVal" (ngModelChange)="selEcuPart.set($event)" />
+                    </div>
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-ecu-sw">ECU Yazılım Numarası</label>
+                      <input id="t-ecu-sw" class="text-input" type="text" placeholder="8507…"
+                        [(ngModel)]="selEcuSwVal" (ngModelChange)="selEcuSw.set($event)" />
+                    </div>
+                    <!-- Row 3: Dinamometrede -->
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-dyno">Dinamometrede</label>
+                      <div class="sel-wrap">
+                        <select id="t-dyno" class="sel" [(ngModel)]="selDynoVal" (ngModelChange)="selDyno.set($event)">
+                          <option value="">— Seçin —</option>
+                          <option value="HAYIR">HAYIR</option>
+                          <option value="EVET">EVET</option>
+                        </select>
+                        <i class="pi pi-chevron-down sel-arrow"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 3 — PCODE VE NOT -->
+                <div class="step-card">
+                  <div class="step-card__head">
+                    <div class="step-num">3</div>
+                    <div>
+                      <h2 class="step-card__title">Pcode ve Not</h2>
+                      <p class="step-card__sub">Lütfen pcode ve not ekleyin</p>
+                    </div>
+                  </div>
+
+                  <div class="vehicle-row">
+                    <div class="sel-group">
+                      <label class="sel-label" for="t-pcode">Pcode</label>
+                      <input id="t-pcode" class="text-input" type="text" placeholder="P0000…"
+                        [(ngModel)]="selPcodeVal" (ngModelChange)="selPcode.set($event)" />
+                    </div>
+                    <div class="sel-group" style="grid-column: span 2">
+                      <label class="sel-label" for="t-note">Not</label>
+                      <textarea id="t-note" class="text-area" rows="3" placeholder="Eklemek istediğiniz notlar…"
+                        [(ngModel)]="selNoteVal" (ngModelChange)="selNote.set($event)"></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 4 — DEĞİŞTİRİLMİŞ PARÇALAR -->
+                <div class="step-card">
+                  <div class="step-card__head">
+                    <div class="step-num">4</div>
+                    <div>
+                      <h2 class="step-card__title">Değiştirilmiş Parçalar</h2>
+                      <p class="step-card__sub">Araçta daha önce yapılan modifikasyonları işaretleyin</p>
+                    </div>
+                  </div>
+
+                  <div class="mod-parts-section">
+                    <div class="mod-parts-header">
+                      <span class="sel-label">Değiştirilmiş Parçalar <span class="optional-pill">Opsiyonel</span></span>
+                      @if (selectedParts().size > 0) {
+                        <span class="mod-parts-count">{{ selectedParts().size }} parça seçildi</span>
+                      }
+                    </div>
+                    <div class="mod-parts-grid">
+                      @for (part of modifiedPartsList; track part) {
+                        <button type="button" class="mod-part-item" [class.mod-part-item--on]="isPartSelected(part)" (click)="togglePart(part)">
+                          <span class="mod-part-check">@if (isPartSelected(part)) { <i class="pi pi-check"></i> }</span>
+                          <span class="mod-part-label">{{ part }}</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <!-- STEP 5 — EKSTRA MODÜLLER -->
+                <div class="step-card">
+                  <div class="step-card__head">
+                    <div class="step-num">5</div>
+                    <div>
+                      <h2 class="step-card__title">Ekstra Modüller <span class="optional-pill">Opsiyonel</span></h2>
+                      <p class="step-card__sub">Yazılımınıza eklemek istediğiniz modülleri seçin</p>
+                    </div>
+                    <div class="step-card__actions">
+                      <button class="ghost-btn ghost-btn--danger" (click)="clearAll()" type="button" [disabled]="selectedModules().size === 0">Temizle</button>
+                    </div>
+                  </div>
+                  @for (group of groups; track group) {
+                    <div class="mod-group">
+                      <h3 class="mod-group__title">{{ group }}</h3>
+                      <div class="mod-grid">
+                        @for (mod of modulesByGroup(group); track mod.key) {
+                          <button class="mod-tile" [class.mod-tile--on]="isSelected(mod.key)" (click)="toggleModule(mod.key)" type="button">
+                            <div class="mod-tile__top">
+                              <span class="mod-tile__label">{{ mod.label }}</span>
+                              <span class="mod-indicator" [class.mod-indicator--on]="isSelected(mod.key)">{{ isSelected(mod.key) ? 'ON' : 'OFF' }}</span>
+                            </div>
+                            <p class="mod-tile__desc">{{ mod.desc }}</p>
+                            <span class="mod-tile__price">+{{ mod.price | number }}₺</span>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- STEP 6 — ECU DOSYASI -->
+                <div class="step-card">
+                  <div class="step-card__head">
+                    <div class="step-num">6</div>
+                    <div>
+                      <h2 class="step-card__title">ECU Dosyasını Yükle</h2>
+                      <p class="step-card__sub">Aracınızdan okunan orijinal ECU dosyasını yükleyin</p>
+                    </div>
+                  </div>
+
+                  <div
+                    class="upload-zone"
+                    [class.upload-zone--drag]="isDragging()"
+                    [class.upload-zone--filled]="uploadedFile()"
+                    (dragover)="onDragOver($event)"
+                    (dragleave)="isDragging.set(false)"
+                    (drop)="onDrop($event)"
+                  >
+                    @if (!uploadedFile()) {
+                      <div class="upload-zone__inner">
+                        <div class="upload-zone__icon"><i class="pi pi-cloud-upload"></i></div>
+                        <p class="upload-zone__title">Orijinal ECU Dosyasını Sürükle & Bırak</p>
+                        <p class="upload-zone__hint">.bin · .ori · .hex · .kess · .ktag formatları desteklenir</p>
+                        <label class="upload-zone__btn">
+                          <i class="pi pi-folder-open"></i> Dosya Seç
+                          <input type="file" accept=".bin,.ori,.hex,.mod,.kess,.ktag" (change)="onFileSelect($event)" style="display:none" />
+                        </label>
+                      </div>
+                    } @else {
+                      <div class="upload-file-info">
+                        <div class="upload-file-info__icon"><i class="pi pi-file"></i></div>
+                        <div class="upload-file-info__body">
+                          <span class="upload-file-info__name">{{ uploadedFile()!.name }}</span>
+                          <span class="upload-file-info__meta">{{ formatSize(uploadedFile()!.size) }} · Hazır</span>
                         </div>
-                        <p class="mod-tile__desc">{{ mod.desc }}</p>
-                        <span class="mod-tile__price">+{{ mod.price | number }}₺</span>
-                      </button>
+                        <button class="upload-file-info__remove" (click)="uploadedFile.set(null)" type="button"><i class="pi pi-times"></i></button>
+                      </div>
                     }
                   </div>
-                </div>
-              }
-            </div>
 
-            <!-- STEP 4 — ORDER SUMMARY + CTA -->
-            <div class="order-summary order-summary--tuning">
-              <div class="order-summary__left">
-                <span class="order-summary__count">Sipariş Özeti</span>
-                <div class="order-summary__lines">
-                  <div class="order-line">
-                    <span class="order-line__k">{{ selBrand() }} {{ selModel() }} · {{ tuneLabel() }}</span>
-                    <span class="order-line__v">₺{{ tuningPrice() | number }}</span>
-                  </div>
-                  @if (selectedModules().size > 0) {
-                    <div class="order-line">
-                      <span class="order-line__k">{{ selectedModules().size }} ekstra modül</span>
-                      <span class="order-line__v">₺{{ totalPrice() | number }}</span>
-                    </div>
-                  }
-                  @if (uploadedFile()) {
-                    <div class="order-line order-line--ok">
-                      <span class="order-line__k"><i class="pi pi-check-circle"></i> Dosya yüklendi: {{ uploadedFile()!.name }}</span>
-                    </div>
-                  } @else {
-                    <div class="order-line order-line--warn">
-                      <span class="order-line__k"><i class="pi pi-exclamation-circle"></i> Dosya henüz yüklenmedi</span>
-                    </div>
-                  }
-                </div>
-              </div>
-              <div class="order-summary__right">
-                <div class="order-summary__total">
-                  <span class="order-summary__total-lbl">Toplam</span>
-                  <span class="order-summary__total-val">₺{{ tuningGrandTotal() | number }}</span>
-                </div>
-                <div class="order-summary__actions">
-                  <button class="cta-btn cta-btn--primary" type="button" [disabled]="!uploadedFile()" (click)="submitOrder()">
-                    <i class="pi pi-shopping-cart"></i> Sipariş Ver
-                  </button>
-                  <a href="/contact" class="cta-btn cta-btn--outline">
-                    <i class="pi pi-headphones"></i> Uzmanla Konuş
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <!-- SUCCESS -->
-            @if (orderSent()) {
-              <div class="order-success">
-                <div class="order-success__icon"><i class="pi pi-check-circle"></i></div>
-                <div class="order-success__body">
-                  <h3>Siparişiniz Alındı!</h3>
-                  <p>
-                    {{ tuneLabel() }} yazılım siparişiniz
-                    @if (selectedModules().size > 0) {
-                      <span>ve {{ selectedModules().size }} ekstra modül</span>
-                    }
-                    ekibimize iletildi. Hazırlık tamamlanınca e-posta ile bilgilendirileceksiniz.
+                  <p class="upload-hint-note">
+                    <i class="pi pi-info-circle"></i>
+                    Dosyanız yoksa sağdaki "Uzmanla Konuş" butonundan destek ekibimize ulaşabilirsiniz.
                   </p>
                 </div>
-                <button class="ghost-btn" (click)="resetOrder()" type="button">Yeni Sipariş</button>
-              </div>
-            }
+
+              </div><!-- /checkout-steps (dış) -->
+
+              <!-- ── RIGHT: Sticky Summary Panel ── -->
+              <div class="checkout-sidebar">
+                <div class="cs">
+
+                  <!-- Vehicle Header -->
+                  <div class="cs__vehicle">
+                    <div class="cs__vehicle-icon"><i class="pi pi-car"></i></div>
+                    <div class="cs__vehicle-info">
+                      <span class="cs__brand">{{ selBrand() }}</span>
+                      <span class="cs__model">{{ selModel() }} · {{ selSeries() }}</span>
+                    </div>
+                  </div>
+
+                  <div class="cs__divider"></div>
+
+                  <!-- Stage line -->
+                  <div class="cs__line">
+                    <div class="cs__line-left">
+                      <span class="cs__stage-badge cs__stage-badge--{{ selTune() }}">{{ tuneLabel() }}</span>
+                      <span class="cs__line-desc">Chip Tuning Yazılımı</span>
+                    </div>
+                    <span class="cs__line-price">₺{{ tuningPrice() | number }}</span>
+                  </div>
+
+                  <!-- Engine specs mini -->
+                  <div class="cs__engine-row">
+                    <span class="cs__engine-chip">{{ tuningResult()!.engineCode }}</span>
+                    <span class="cs__engine-chip">{{ tuningResult()!.displacementCc | number }} cc</span>
+                    <span class="cs__engine-chip cs__engine-chip--fuel">{{ tuningResult()!.fuel }}</span>
+                  </div>
+
+                  <!-- Power gain -->
+                  <div class="cs__power">
+                    <div class="cs__power-col">
+                      <span class="cs__power-lbl">Orjinal</span>
+                      <span class="cs__power-val">{{ tuningResult()!.stock.hp }} <em>HP</em></span>
+                      <span class="cs__power-val">{{ tuningResult()!.stock.torque }} <em>Nm</em></span>
+                    </div>
+                    <i class="pi pi-arrow-right cs__power-arrow"></i>
+                    <div class="cs__power-col cs__power-col--tuned">
+                      <span class="cs__power-lbl">{{ tuneLabel() }}</span>
+                      <span class="cs__power-val cs__power-val--white">{{ tunedHp() }} <em>HP</em>
+                        <span class="cs__power-delta">+{{ tunedHp() - tuningResult()!.stock.hp }}</span>
+                      </span>
+                      <span class="cs__power-val cs__power-val--white">{{ tunedTorque() }} <em>Nm</em>
+                        <span class="cs__power-delta">+{{ tunedTorque() - tuningResult()!.stock.torque }}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Modules -->
+                  @if (selectedModules().size > 0) {
+                    <div class="cs__divider"></div>
+                    <div class="cs__section-title">Ekstra Modüller</div>
+                    @for (key of selectedArray(); track key) {
+                      <div class="cs__line cs__line--mod">
+                        <div class="cs__line-left">
+                          <i class="pi pi-check-circle cs__mod-icon"></i>
+                          <span class="cs__line-desc">{{ labelOf(key) }}</span>
+                        </div>
+                        <span class="cs__line-price cs__line-price--sm">+₺{{ modPrice(key) | number }}</span>
+                      </div>
+                    }
+                  }
+
+                  <!-- Vehicle details filled -->
+                  @if (selVehicleType() || selYear() || selEcu() || selTransmission() || selKm() || selPlate()) {
+                    <div class="cs__divider"></div>
+                    <div class="cs__section-title">Araç Detayları</div>
+                    @if (selVehicleType()) {
+                      <div class="cs__detail-row"><i class="pi pi-car"></i><span>{{ selVehicleType() }}</span></div>
+                    }
+                    @if (selEcu()) {
+                      <div class="cs__detail-row"><i class="pi pi-microchip"></i><span>{{ selEcu() }}</span></div>
+                    }
+                    @if (selYear()) {
+                      <div class="cs__detail-row"><i class="pi pi-calendar"></i><span>{{ selYear() }}</span></div>
+                    }
+                    @if (selTransmission()) {
+                      <div class="cs__detail-row"><i class="pi pi-cog"></i><span>{{ selTransmission() }}</span></div>
+                    }
+                    @if (selKm()) {
+                      <div class="cs__detail-row"><i class="pi pi-gauge"></i><span>{{ selKm() | number }} km</span></div>
+                    }
+                    @if (selPlate()) {
+                      <div class="cs__detail-row"><i class="pi pi-id-card"></i><span>{{ selPlate() }}</span></div>
+                    }
+                  }
+
+                  <!-- Ayarlama Bilgileri -->
+                  @if (selReadingTool() || selVirtualFile() || selVin() || selEcuHw() || selEcuPart() || selEcuSw() || selDyno()) {
+                    <div class="cs__divider"></div>
+                    <div class="cs__section-title">Ayarlama Bilgileri</div>
+                    @if (selReadingTool()) {
+                      <div class="cs__detail-row"><i class="pi pi-database"></i><span>{{ selReadingTool() }}</span></div>
+                    }
+                    @if (selVirtualFile()) {
+                      <div class="cs__detail-row"><i class="pi pi-file"></i><span>Sanal Dosya: {{ selVirtualFile() }}</span></div>
+                    }
+                    @if (selVin()) {
+                      <div class="cs__detail-row"><i class="pi pi-barcode"></i><span>VIN: {{ selVin() }}</span></div>
+                    }
+                    @if (selEcuHw()) {
+                      <div class="cs__detail-row"><i class="pi pi-microchip"></i><span>HW: {{ selEcuHw() }}</span></div>
+                    }
+                    @if (selEcuPart()) {
+                      <div class="cs__detail-row"><i class="pi pi-microchip"></i><span>Part: {{ selEcuPart() }}</span></div>
+                    }
+                    @if (selEcuSw()) {
+                      <div class="cs__detail-row"><i class="pi pi-microchip"></i><span>SW: {{ selEcuSw() }}</span></div>
+                    }
+                    @if (selDyno()) {
+                      <div class="cs__detail-row"><i class="pi pi-chart-line"></i><span>Dyno: {{ selDyno() }}</span></div>
+                    }
+                  }
+
+                  <!-- Pcode & Not -->
+                  @if (selPcode() || selNote()) {
+                    <div class="cs__divider"></div>
+                    <div class="cs__section-title">Pcode & Not</div>
+                    @if (selPcode()) {
+                      <div class="cs__detail-row"><i class="pi pi-tag"></i><span>{{ selPcode() }}</span></div>
+                    }
+                    @if (selNote()) {
+                      <div class="cs__detail-row cs__detail-row--note"><i class="pi pi-pen-to-square"></i><span>{{ selNote() }}</span></div>
+                    }
+                  }
+
+                  <!-- Modified parts (listed individually like modules) -->
+                  @if (selectedParts().size > 0) {
+                    <div class="cs__divider"></div>
+                    <div class="cs__section-title">Değiştirilmiş Parçalar</div>
+                    @for (part of selectedPartsArray(); track part) {
+                      <div class="cs__line cs__line--mod">
+                        <div class="cs__line-left">
+                          <i class="pi pi-wrench cs__mod-icon"></i>
+                          <span class="cs__line-desc">{{ part }}</span>
+                        </div>
+                      </div>
+                    }
+                  }
+
+                  <!-- File status -->
+                  <div class="cs__divider"></div>
+                  @if (uploadedFile()) {
+                    <div class="cs__file cs__file--ok">
+                      <i class="pi pi-check-circle"></i>
+                      <div>
+                        <span class="cs__file-name">{{ uploadedFile()!.name }}</span>
+                        <span class="cs__file-size">{{ formatSize(uploadedFile()!.size) }}</span>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="cs__file cs__file--warn">
+                      <i class="pi pi-exclamation-triangle"></i>
+                      <span>ECU dosyası henüz yüklenmedi</span>
+                    </div>
+                  }
+
+                  <!-- Total -->
+                  <div class="cs__total">
+                    <span class="cs__total-lbl">Toplam Tutar</span>
+                    <span class="cs__total-val">₺{{ tuningGrandTotal() | number }}</span>
+                  </div>
+
+                  <!-- CTA -->
+                  <div class="cs__actions">
+                    <button class="cta-btn cta-btn--primary" style="width:100%; justify-content:center"
+                      type="button" [disabled]="!uploadedFile()" (click)="submitOrder()">
+                      <i class="pi pi-shopping-cart"></i> Sipariş Ver
+                    </button>
+                    <a href="/contact" class="cta-btn cta-btn--outline" style="width:100%; justify-content:center">
+                      <i class="pi pi-headphones"></i> Uzmanla Konuş
+                    </a>
+                  </div>
+
+                  @if (!uploadedFile()) {
+                    <p class="cs__file-warn-note">
+                      <i class="pi pi-lock"></i> Sipariş vermek için ECU dosyası gereklidir (Adım 4)
+                    </p>
+                  }
+
+                </div>
+              </div><!-- /checkout-sidebar -->
+
+            </div><!-- /checkout-layout -->
           }
 
         </div>
@@ -790,6 +1218,7 @@ export class ToolsPage {
   });
 
   protected readonly selectedArray = computed(() => [...this.selectedModules()]);
+  protected readonly selectedPartsArray = computed(() => [...this.selectedParts()]);
   protected readonly totalPrice = computed(() =>
     [...this.selectedModules()].reduce((sum, key) => {
       const mod = MODULES.find(m => m.key === key);
@@ -817,6 +1246,9 @@ export class ToolsPage {
   labelOf(key: string): string {
     return MODULES.find(m => m.key === key)?.label ?? key;
   }
+  modPrice(key: string): number {
+    return MODULES.find(m => m.key === key)?.price ?? 0;
+  }
   submitOrder(): void {
     this.orderSent.set(true);
   }
@@ -833,6 +1265,38 @@ export class ToolsPage {
     this.selSeries.set('');
     this.selEngineName.set('');
     this.selTune.set('stage1');
+    this.selVehicleType.set('');
+    this.selEcu.set('');
+    this.selYear.set('');
+    this.selTransmission.set('');
+    this.selKm.set('');
+    this.selPlate.set('');
+    this.selModifiedParts.set('');
+    this.selReadingTool.set('');
+    this.selVirtualFile.set('');
+    this.selVin.set('');
+    this.selEcuHw.set('');
+    this.selEcuPart.set('');
+    this.selEcuSw.set('');
+    this.selDyno.set('');
+    this.selPcode.set('');
+    this.selNote.set('');
+    this.selVehicleTypeVal  = '';
+    this.selEcuVal          = '';
+    this.selYearVal         = '';
+    this.selTransmissionVal = '';
+    this.selKmVal           = '';
+    this.selPlateVal        = '';
+    this.selReadingToolVal  = '';
+    this.selVirtualFileVal  = '';
+    this.selVinVal          = '';
+    this.selEcuHwVal        = '';
+    this.selEcuPartVal      = '';
+    this.selEcuSwVal        = '';
+    this.selDynoVal         = '';
+    this.selPcodeVal        = '';
+    this.selNoteVal         = '';
+    this.selectedParts.set(new Set());
   }
   onModBrand(ev: Event): void {
     this.modBrand.set((ev.target as HTMLSelectElement).value);
@@ -870,6 +1334,109 @@ export class ToolsPage {
   protected readonly selTune       = signal<'stage1' | 'stage2' | 'stage3'>('stage1');
   protected readonly tuningResult  = signal<Engine | null>(null);
 
+  /* ─── ARAÇ DETAYLARI (müşteri giriyor) ─── */
+  protected readonly selVehicleType   = signal('');
+  protected readonly selEcu           = signal('');
+  protected readonly selYear          = signal('');
+  protected readonly selTransmission  = signal('');
+  protected readonly selKm            = signal('');
+  protected readonly selPlate         = signal('');
+  protected readonly selModifiedParts = signal('');
+
+  protected readonly vehicleTypeOptions = [
+    'Araba', 'SUV / 4x4', 'Spor', 'Kamyonet', 'Minivan / Van', 'Ticari'
+  ];
+
+  protected readonly transmissionOptions = [
+    'Manuel', 'Otomatik', 'DSG / S-Tronic', 'PDK', 'CVT', 'DCT / TCT'
+  ];
+
+  protected readonly yearOptions: string[] = (() => {
+    const years: string[] = [];
+    for (let y = new Date().getFullYear(); y >= 1990; y--) { years.push(String(y)); }
+    return years;
+  })();
+
+  /* ECU seçenekleri — seçili motordan otomatik dolar, kullanıcı değiştirebilir */
+  protected readonly availableEcuOptions = computed<string[]>(() => {
+    const engine = this.selEngine();
+    if (!engine) { return []; }
+    // Primary ECU from engine data + related ECUs from BRANDS_MODULE if brand matches
+    const primary = engine.ecu;
+    const brandEntry = BRANDS_MODULE.find(b =>
+      b.label.toLowerCase().includes(this.selBrand().toLowerCase()) ||
+      this.selBrand().toLowerCase().includes(b.label.split(' ')[0].toLowerCase())
+    );
+    const extras = brandEntry?.ecus.filter(e => e !== primary) ?? [];
+    return [primary, ...extras];
+  });
+
+  /* ─── AYARLAMA BİLGİLERİ ─── */
+  protected readonly selReadingTool  = signal('');
+  protected readonly selVirtualFile  = signal('');
+  protected readonly selVin          = signal('');
+  protected readonly selEcuHw        = signal('');
+  protected readonly selEcuPart      = signal('');
+  protected readonly selEcuSw        = signal('');
+  protected readonly selDyno         = signal('');
+
+  /* ─── PCODE & NOT ─── */
+  protected readonly selPcode = signal('');
+  protected readonly selNote  = signal('');
+
+  protected readonly readingToolOptions = [
+    'Flex OBD', 'KESS V2', 'KESS V3', 'KTAG', 'Magic Motorsport',
+    'PCMFlash', 'AutoTuner', 'CMD Flash', 'ByteShooter', 'Alientech KESSv2',
+  ];
+
+  /* ngModel binding vars (two-way binding → signal sync) */
+  protected selVehicleTypeVal  = '';
+  protected selEcuVal          = '';
+  protected selYearVal         = '';
+  protected selTransmissionVal = '';
+  protected selKmVal           = '';
+  protected selPlateVal        = '';
+  protected selReadingToolVal  = '';
+  protected selVirtualFileVal  = '';
+  protected selVinVal          = '';
+  protected selEcuHwVal        = '';
+  protected selEcuPartVal      = '';
+  protected selEcuSwVal        = '';
+  protected selDynoVal         = '';
+  protected selPcodeVal        = '';
+  protected selNoteVal         = '';
+
+  /* Modified parts checkbox list */
+  protected readonly modifiedPartsList = [
+    'Soğuk Hava Giriş Kiti',
+    'Ara Soğutucu (Intercooler)',
+    'Egzoz Borusu (Katalizörsüz)',
+    'Emme Manifoldu',
+    'Egzoz Sistemi (Turbo Çıkışı)',
+    'Egzoz Sistemi (Katalizör Sonrası)',
+    'Geliştirilmiş Enjektörler',
+    'Geliştirilmiş Harita Sensörü',
+    'Atık Gaz Valfi (BOV)',
+    'Boşaltma Vanası',
+    'Şarj Hava Borusu Kiti',
+    'Hibrit Turbo',
+    'Yükseltilmiş (Büyük) Turbo',
+    'Yarı Gaz Sistemi',
+    'Yüksek Akışlı Yakıt Pompası',
+    'Spor Hava Filtresi',
+  ];
+  protected readonly selectedParts = signal<Set<string>>(new Set());
+
+  togglePart(part: string): void {
+    const s = new Set(this.selectedParts());
+    if (s.has(part)) { s.delete(part); } else { s.add(part); }
+    this.selectedParts.set(s);
+    this.selModifiedParts.set([...s].join(', '));
+  }
+  isPartSelected(part: string): boolean {
+    return this.selectedParts().has(part);
+  }
+
   protected readonly availableModels = computed(() =>
     CATALOG.find(x => x.label === this.selBrand())?.models ?? []
   );
@@ -882,7 +1449,17 @@ export class ToolsPage {
   protected readonly selEngine = computed(() =>
     this.availableEngines().find(e => e.label === this.selEngineName()) ?? null
   );
-  protected readonly canCalculate = computed(() => !!this.selEngine());
+  protected readonly allFieldsFilled = computed(() =>
+    !!this.selVehicleType() &&
+    !!this.selEngineName() &&
+    !!this.selEcu() &&
+    !!this.selYear() &&
+    !!this.selTransmission() &&
+    !!this.selKm() &&
+    !!this.selPlate()
+  );
+
+  protected readonly canCalculate = computed(() => this.allFieldsFilled());
 
   protected readonly tunedHp = computed(() => {
     const e = this.tuningResult();
@@ -974,23 +1551,70 @@ export class ToolsPage {
 
   onBrand(ev: Event): void {
     this.selBrand.set((ev.target as HTMLSelectElement).value);
-    this.selModel.set(''); this.selSeries.set(''); this.selEngineName.set(''); this.tuningResult.set(null);
+    this.selModel.set(''); this.selSeries.set(''); this.selEngineName.set('');
+    this.selEcuVal = ''; this.selEcu.set('');
+    this.tuningResult.set(null);
   }
   onModel(ev: Event): void {
     this.selModel.set((ev.target as HTMLSelectElement).value);
-    this.selSeries.set(''); this.selEngineName.set(''); this.tuningResult.set(null);
+    this.selSeries.set(''); this.selEngineName.set('');
+    this.selEcuVal = ''; this.selEcu.set('');
+    this.tuningResult.set(null);
   }
   onSeries(ev: Event): void {
     this.selSeries.set((ev.target as HTMLSelectElement).value);
-    this.selEngineName.set(''); this.tuningResult.set(null);
+    this.selEngineName.set('');
+    this.selEcuVal = ''; this.selEcu.set('');
+    this.tuningResult.set(null);
   }
   onEngine(ev: Event): void {
     this.selEngineName.set((ev.target as HTMLSelectElement).value);
     this.tuningResult.set(null);
+    // Auto-fill ECU from selected engine
+    const engine = this.availableEngines().find(e => e.label === this.selEngineName());
+    if (engine) {
+      this.selEcuVal = engine.ecu;
+      this.selEcu.set(engine.ecu);
+    }
   }
   calculate(): void {
     const engine = this.selEngine();
     if (!engine) { return; }
     this.tuningResult.set(engine);
+  }
+
+  resetAll(): void {
+    // Araç seçimi
+    this.selBrand.set('');
+    this.selModel.set('');
+    this.selSeries.set('');
+    this.selEngineName.set('');
+    this.selTune.set('stage1');
+    this.tuningResult.set(null);
+    // Form alanları
+    this.selVehicleType.set('');  this.selVehicleTypeVal = '';
+    this.selEcu.set('');          this.selEcuVal = '';
+    this.selYear.set('');         this.selYearVal = '';
+    this.selTransmission.set(''); this.selTransmissionVal = '';
+    this.selKm.set('');           this.selKmVal = '';
+    this.selPlate.set('');        this.selPlateVal = '';
+    // Ayarlama bilgileri
+    this.selReadingTool.set('');  this.selReadingToolVal = '';
+    this.selVirtualFile.set('');  this.selVirtualFileVal = '';
+    this.selVin.set('');          this.selVinVal = '';
+    this.selEcuHw.set('');        this.selEcuHwVal = '';
+    this.selEcuPart.set('');      this.selEcuPartVal = '';
+    this.selEcuSw.set('');        this.selEcuSwVal = '';
+    this.selDyno.set('');         this.selDynoVal = '';
+    // Pcode & not
+    this.selPcode.set(''); this.selPcodeVal = '';
+    this.selNote.set('');  this.selNoteVal = '';
+    // Parçalar & modüller
+    this.selectedParts.set(new Set());
+    this.selModifiedParts.set('');
+    this.selectedModules.set(new Set());
+    // Dosya & sipariş
+    this.uploadedFile.set(null);
+    this.orderSent.set(false);
   }
 }

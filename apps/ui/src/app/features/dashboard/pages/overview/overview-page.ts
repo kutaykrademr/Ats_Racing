@@ -314,7 +314,7 @@ export class OverviewPage {
   protected readonly stats = [
     { label: 'Toplam Dosya', value: '12', icon: 'pi-folder', color: '#e63946', trend: '+2 bu ay', trendUp: true },
     { label: 'Toplam Harcama', value: '₺8.450', icon: 'pi-wallet', color: '#60a5fa', trend: '+₺1.200', trendUp: true },
-    { label: 'Aktif Lisans', value: '3', icon: 'pi-verified', color: '#4ade80', trend: '2 yenilendi', trendUp: true },
+    { label: 'Tamamlanan Sipariş', value: '9', icon: 'pi-check-circle', color: '#4ade80', trend: '+3 bu ay', trendUp: true },
     { label: 'Bekleyen Sipariş', value: '1', icon: 'pi-clock', color: '#fbbf24', trend: 'Hazırlanıyor', trendUp: false },
   ];
 
