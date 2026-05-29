@@ -251,8 +251,8 @@ const STATUS_LABEL: Record<TicketStatus, string> = { open: 'Açık', pending: 'B
     .atk-convo__subject { font-size: 1rem; font-weight: 700; color: #fff; margin: 0 0 3px; }
     .atk-convo__meta { font-size: 0.72rem; color: rgba(255,255,255,0.35); margin: 0; }
 
-    .atk-convo__status-ctrl { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
-    .atk-status-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .atk-convo__status-ctrl { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+    .atk-status-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-left: auto; }
     .atk-status-btn {
       display: flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; border-radius: 7px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 160ms;
       &--open     { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.2);  &:hover { background: rgba(251,191,36,0.2);  } }

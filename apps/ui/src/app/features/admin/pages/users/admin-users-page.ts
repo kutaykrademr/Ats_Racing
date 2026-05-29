@@ -70,7 +70,7 @@ const ROLE_LABEL: Record<UserRole, string> = { user: 'Kullanıcı', dealer: 'Bay
     <div class="au__header">
       <div>
         <h1 class="au__title">Kullanıcı Yönetimi</h1>
-        <p class="au__sub">{{ filteredByTab().length }} kayıt · Toplam {{ allUsers().length }} hesap</p>
+        <p class="au__sub">{{ filteredByTab().length }} kayıt listeleniyor</p>
       </div>
       <div class="au__search-wrap">
         <div class="au-search">
@@ -87,13 +87,17 @@ const ROLE_LABEL: Record<UserRole, string> = { user: 'Kullanıcı', dealer: 'Bay
       </div>
     </div>
 
-    <!-- Tabs: Kullanıcılar | Adminler -->
+    <!-- Tabs: Kullanıcılar | Bayiler | Adminler -->
     <div class="au__tabs">
-      <button class="au-tab" [class.au-tab--active]="activeTab() === 'members'" type="button" (click)="setTab('members')">
-        <i class="pi pi-users"></i> Kullanıcılar & Bayiler
-        <span class="au-tab__count">{{ countMembers() }}</span>
+      <button class="au-tab" [class.au-tab--active]="activeTab() === 'user'"   type="button" (click)="setTab('user')">
+        <i class="pi pi-user"></i> Kullanıcılar
+        <span class="au-tab__count">{{ countByRole('user') }}</span>
       </button>
-      <button class="au-tab" [class.au-tab--active]="activeTab() === 'admin'"   type="button" (click)="setTab('admin')">
+      <button class="au-tab" [class.au-tab--active]="activeTab() === 'dealer'" type="button" (click)="setTab('dealer')">
+        <i class="pi pi-building"></i> Bayiler
+        <span class="au-tab__count au-tab__count--amber">{{ countByRole('dealer') }}</span>
+      </button>
+      <button class="au-tab" [class.au-tab--active]="activeTab() === 'admin'"  type="button" (click)="setTab('admin')">
         <i class="pi pi-shield"></i> Adminler
         <span class="au-tab__count au-tab__count--purple">{{ countByRole('admin') }}</span>
       </button>
@@ -105,7 +109,7 @@ const ROLE_LABEL: Record<UserRole, string> = { user: 'Kullanıcı', dealer: 'Bay
         <thead><tr>
           <th>Kullanıcı</th>
           <th>Rol</th>
-          @if (activeTab() === 'members') { <th>Sipariş</th><th>Toplam Ödeme</th> }
+          @if (activeTab() !== 'admin') { <th>Sipariş</th><th>Toplam Ödeme</th> }
           <th>Durum</th>
           <th>Kayıt</th>
           <th>Son Giriş</th>
@@ -128,7 +132,7 @@ const ROLE_LABEL: Record<UserRole, string> = { user: 'Kullanıcı', dealer: 'Bay
               <td>
                 <span class="au-role-badge au-role-badge--{{ u.role }}">{{ roleLabel(u.role) }}</span>
               </td>
-              @if (activeTab() === 'members') {
+              @if (activeTab() !== 'admin') {
                 <td class="au-center">{{ u.orders }}</td>
                 <td class="au-payment">{{ u.paymentTotal }}</td>
               }
@@ -147,7 +151,7 @@ const ROLE_LABEL: Record<UserRole, string> = { user: 'Kullanıcı', dealer: 'Bay
             </tr>
           }
           @if (filteredByTab().length === 0) {
-            <tr><td [attr.colspan]="activeTab() === 'members' ? 8 : 6" class="au-empty-td">
+            <tr><td [attr.colspan]="activeTab() !== 'admin' ? 8 : 6" class="au-empty-td">
               <i class="pi pi-users"></i><p>Kayıt bulunamadı</p>
             </td></tr>
           }
@@ -322,6 +326,7 @@ const ROLE_LABEL: Record<UserRole, string> = { user: 'Kullanıcı', dealer: 'Bay
       min-width: 20px; height: 20px; border-radius: 10px; padding: 0 5px;
       background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); font-size: 0.68rem; font-weight: 700;
       display: inline-flex; align-items: center; justify-content: center;
+      &--amber  { background: rgba(245,158,11,0.15); color: #f59e0b; }
       &--purple { background: rgba(167,139,250,0.15); color: #a78bfa; }
     }
 
@@ -448,14 +453,13 @@ const ROLE_LABEL: Record<UserRole, string> = { user: 'Kullanıcı', dealer: 'Bay
 })
 export class AdminUsersPage {
   protected readonly allUsers     = signal<AdminUser[]>(MOCK_USERS);
-  protected readonly activeTab    = signal<'members' | 'admin'>('members');
+  protected readonly activeTab    = signal<UserRole>('user');
   protected readonly search       = signal('');
   protected readonly filterStatus = signal('');
   protected readonly currentView  = signal<'list' | 'detail'>('list');
   protected readonly selectedUser = signal<AdminUser | null>(null);
 
-  setTab(tab: 'members' | 'admin'): void { this.activeTab.set(tab); }
-  countMembers(): number   { return this.allUsers().filter(u => u.role !== 'admin').length; }
+  setTab(tab: UserRole): void { this.activeTab.set(tab); this.goBack(); }
   countByRole(r: UserRole): number { return this.allUsers().filter(u => u.role === r).length; }
   roleLabel(r: UserRole): string   { return ROLE_LABEL[r]; }
   initials(name: string): string   { return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
@@ -464,7 +468,7 @@ export class AdminUsersPage {
     const tab = this.activeTab();
     const q   = this.search().toLowerCase();
     const st  = this.filterStatus();
-    let list  = this.allUsers().filter(u => tab === 'admin' ? u.role === 'admin' : u.role !== 'admin');
+    let list  = this.allUsers().filter(u => u.role === tab);
     if (q)  { list = list.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)); }
     if (st) { list = list.filter(u => u.status === st); }
     return list;

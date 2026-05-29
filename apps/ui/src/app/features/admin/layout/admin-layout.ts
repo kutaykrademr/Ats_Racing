@@ -191,7 +191,6 @@ export class AdminLayout {
   protected readonly navItems: NavItem[] = [
     { label: 'Genel Bakış',  icon: 'pi-home',          route: '/admin/overview' },
     { label: 'Kullanıcılar', icon: 'pi-users',          route: '/admin/users' },
-    { label: 'Bayiler',      icon: 'pi-building',       route: '/admin/dealers' },
     { label: 'Siparişler',   icon: 'pi-shopping-cart',  route: '/admin/orders' },
     { label: 'Ticketlar',    icon: 'pi-comments',       route: '/admin/tickets' },
   ];
