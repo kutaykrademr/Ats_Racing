@@ -250,9 +250,9 @@ const MOCK_TICKETS: Ticket[] = [
 
     <div class="ntm__body">
       <div class="ntm__field">
-        <label class="ntm__label">Sipariş</label>
+        <label class="ntm__label" for="ntm-order">Sipariş</label>
         <div class="sel-wrap">
-          <select class="sel" [(ngModel)]="newOrderId">
+          <select id="ntm-order" class="sel" [(ngModel)]="newOrderId">
             <option value="">— Sipariş seçin —</option>
             @for (o of orders; track o.id) {
               <option [value]="o.id">{{ o.label }} ({{ o.date | date:'d MMM yyyy' }})</option>
@@ -263,13 +263,13 @@ const MOCK_TICKETS: Ticket[] = [
       </div>
 
       <div class="ntm__field">
-        <label class="ntm__label">Konu</label>
-        <input class="ntm__input" type="text" placeholder="Sorununuzu kısaca özetleyin…" [(ngModel)]="newSubject" />
+        <label class="ntm__label" for="ntm-subject">Konu</label>
+        <input id="ntm-subject" class="ntm__input" type="text" placeholder="Sorununuzu kısaca özetleyin…" [(ngModel)]="newSubject" />
       </div>
 
       <div class="ntm__field">
-        <label class="ntm__label">Mesaj</label>
-        <textarea class="ntm__textarea" rows="4" placeholder="Detaylı açıklama yazın…" [(ngModel)]="newMessage"></textarea>
+        <label class="ntm__label" for="ntm-message">Mesaj</label>
+        <textarea id="ntm-message" class="ntm__textarea" rows="4" placeholder="Detaylı açıklama yazın…" [(ngModel)]="newMessage"></textarea>
       </div>
     </div>
 

@@ -223,6 +223,7 @@
   flex-direction: column;
   gap: 0.4rem;
 
+  .auth__field-label,
   label {
     font-family: 'DM Sans', sans-serif;
     font-size: 0.75rem;
