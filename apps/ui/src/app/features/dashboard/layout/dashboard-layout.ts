@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet, Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -29,7 +29,7 @@ interface NavItem {
         </div>
 
         <nav class="dash-nav" aria-label="Dashboard menü">
-          @for (item of navItems; track item.route) {
+          @for (item of navItems(); track item.route) {
             <a
               class="dash-nav__item"
               [routerLink]="item.route"
@@ -303,11 +303,18 @@ export class DashboardLayout {
 
   logout(): void { this.auth.logout(); this.router.navigate(['/login']); }
 
-  protected readonly navItems: NavItem[] = [
-    { label: 'Genel Bakış',  icon: 'pi-home',          route: '/dashboard/overview' },
-    { label: 'Siparişlerim', icon: 'pi-shopping-cart',  route: '/dashboard/orders'   },
-    { label: 'Dosyalarım',   icon: 'pi-folder-open',   route: '/dashboard/files'    },
-    { label: 'Araçlar',      icon: 'pi-sliders-h',     route: '/dashboard/tools'    },
-    { label: 'Destek',       icon: 'pi-headphones',    route: '/dashboard/support'  },
-  ];
+  /** Menü öğeleri — "Ödeme Borçlarım" yalnızca bayilere gösterilir. */
+  protected readonly navItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+      { label: 'Genel Bakış',  icon: 'pi-home',          route: '/dashboard/overview' },
+      { label: 'Siparişlerim', icon: 'pi-shopping-cart',  route: '/dashboard/orders'   },
+      { label: 'Dosyalarım',   icon: 'pi-folder-open',   route: '/dashboard/files'    },
+      { label: 'Araçlar',      icon: 'pi-sliders-h',     route: '/dashboard/tools'    },
+    ];
+    if (this.auth.isDealer()) {
+      items.push({ label: 'Ödeme Borçlarım', icon: 'pi-wallet', route: '/dashboard/payments' });
+    }
+    items.push({ label: 'Destek', icon: 'pi-headphones', route: '/dashboard/support' });
+    return items;
+  });
 }

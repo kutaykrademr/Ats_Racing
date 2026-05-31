@@ -42,6 +42,12 @@ export const dashboardRoutes: Route[] = [
         data: { title: 'Araçlar' },
       },
       {
+        path: 'payments',
+        loadComponent: () =>
+          import('./pages/payments/payments-page').then(m => m.PaymentsPage),
+        data: { title: 'Ödeme Borçlarım' },
+      },
+      {
         path: 'support',
         loadComponent: () =>
           import('./pages/support/support-page').then(m => m.SupportPage),
