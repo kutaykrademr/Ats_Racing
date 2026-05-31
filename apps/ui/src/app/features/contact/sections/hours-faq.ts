@@ -29,13 +29,5 @@ export class ContactHoursFaq {
       q: 'Randevu için nasıl iletişime geçebilirim?',
       a: 'Yukarıdaki formu ya da WhatsApp hattımızı kullanabilirsin. Aynı gün içinde dönüş yapıyoruz.',
     },
-    {
-      q: 'Yedek araç sağlıyor musunuz?',
-      a: 'Stage 2 ve üzeri tüm modifiye projelerinde isteğe bağlı olarak yedek araç sunuyoruz.',
-    },
-    {
-      q: 'Yaptığınız işleri garanti ediyor musunuz?',
-      a: 'Evet — tüm modifiye ve detaylı işlerimiz 24 ay servis garantisi ile teslim edilir.',
-    },
   ];
 }

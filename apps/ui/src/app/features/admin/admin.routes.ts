@@ -34,6 +34,11 @@ export const adminRoutes: Route[] = [
         loadComponent: () => import('./pages/tickets/admin-tickets-page').then(m => m.AdminTicketsPage),
         data: { title: 'Ticketlar' },
       },
+      {
+        path: 'registrations',
+        loadComponent: () => import('./pages/registrations/admin-registrations-page').then(m => m.AdminRegistrationsPage),
+        data: { title: 'Üyelik Başvuruları' },
+      },
     ],
   },
 ];

@@ -87,11 +87,41 @@
         </form>
       } @else {
         <form class="auth__form" [formGroup]="registerForm" (ngSubmit)="submit()" novalidate>
+          <div class="auth__field">
+            <label>Hesap Tipi</label>
+            <div class="auth__segment" role="radiogroup" aria-label="Hesap tipi">
+              <button
+                type="button"
+                role="radio"
+                class="auth__segment-btn"
+                [class.is-active]="accountType() === 'user'"
+                [attr.aria-checked]="accountType() === 'user'"
+                (click)="setAccountType('user')"
+              ><i class="pi pi-user"></i> Bireysel</button>
+              <button
+                type="button"
+                role="radio"
+                class="auth__segment-btn"
+                [class.is-active]="accountType() === 'dealer'"
+                [attr.aria-checked]="accountType() === 'dealer'"
+                (click)="setAccountType('dealer')"
+              ><i class="pi pi-building"></i> Bayi</button>
+            </div>
+          </div>
+
           <div class="auth__field" [class.is-invalid]="hasError('name')">
-            <label for="reg-name">Ad Soyad</label>
+            <label for="reg-name">{{ accountType() === 'dealer' ? 'Yetkili Ad Soyad' : 'Ad Soyad' }}</label>
             <input id="reg-name" pInputText formControlName="name" autocomplete="name" />
             @if (errorOf('name'); as msg) { <small role="alert">{{ msg }}</small> }
           </div>
+
+          @if (accountType() === 'dealer') {
+            <div class="auth__field" [class.is-invalid]="hasError('dealershipName')">
+              <label for="reg-dealership">Bayi Adı</label>
+              <input id="reg-dealership" pInputText formControlName="dealershipName" autocomplete="organization" />
+              @if (errorOf('dealershipName'); as msg) { <small role="alert">{{ msg }}</small> }
+            </div>
+          }
 
           <div class="auth__field" [class.is-invalid]="hasError('email')">
             <label for="reg-email">E-posta</label>

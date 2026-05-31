@@ -1,0 +1,62 @@
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { AuthService } from './auth.service';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
+import { ResendDto } from './dto/resend.dto';
+
+function extractBearer(header?: string): string {
+  if (!header?.startsWith('Bearer ')) {
+    throw new UnauthorizedException('Yetkilendirme başlığı eksik.');
+  }
+  return header.slice('Bearer '.length).trim();
+}
+
+@ApiTags('auth')
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly auth: AuthService) {}
+
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Kullanıcı veya bayi kaydı (e-posta doğrulama + admin onay gerektirir)' })
+  @ApiOkResponse({ description: 'Kayıt alındı, doğrulama e-postası gönderildi.' })
+  register(@Body() dto: RegisterDto) {
+    return this.auth.register(dto);
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Giriş yap (yalnızca doğrulanmış + onaylanmış hesaplar)' })
+  login(@Body() dto: LoginDto) {
+    return this.auth.login(dto);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Doğrulama e-postasını tekrar gönder' })
+  resend(@Body() dto: ResendDto) {
+    return this.auth.resendVerification(dto.email);
+  }
+
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Mevcut oturumdaki kullanıcıyı getir' })
+  me(@Headers('authorization') authorization?: string) {
+    return this.auth.me(extractBearer(authorization));
+  }
+}

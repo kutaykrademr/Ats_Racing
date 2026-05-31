@@ -16,9 +16,9 @@ interface InfoItem {
 })
 export class ContactInfo {
   protected readonly items: readonly InfoItem[] = [
-    { icon: 'pi pi-map-marker', label: 'Adres',    value: 'Atatürk Mah. Performans Cad. No:42, İstanbul' },
+    { icon: 'pi pi-map-marker', label: 'Adres',    value: 'ATS RACING GULEN HAN NO: 21 NO: 9 GUNGOREN MEHMET NESIH OZMEN MAH. UZUN SK ISTANBUL GUNGOREN, TIISTANBUL AREA 34169 TR' },
     { icon: 'pi pi-phone',      label: 'Telefon',  value: '+90 (212) 000 00 00', href: 'tel:+902120000000' },
-    { icon: 'pi pi-envelope',   label: 'E-posta',  value: 'info@atsracing.com',  href: 'mailto:info@atsracing.com' },
+    { icon: 'pi pi-envelope',   label: 'E-posta',  value: 'mapping@atsracing.com.tr',  href: 'mailto:mapping@atsracing.com.tr' },
     { icon: 'pi pi-clock',      label: 'Çalışma Saatleri', value: 'Pzt – Cts · 09:00 – 19:00' },
   ];
 

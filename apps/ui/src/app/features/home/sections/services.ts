@@ -20,14 +20,14 @@ interface ServiceTile {
 export class HomeServices {
   protected readonly services: readonly ServiceTile[] = [
     {
-      title: 'Interior Customization',
-      tag: 'Detaylı Bakım',
+      title: 'DSG Optimizasyonu',
+      tag: 'DSG',
       image: 'https://images.unsplash.com/photo-1601362840469-51e4d8d58785?auto=format&fit=crop&w=1200&q=80',
       link: '/contact',
     },
     {
-      title: 'Aero Upgrades',
-      tag: 'Aerodinamik',
+      title: 'DPF EGR Çözümleri',
+      tag: 'DPF EGR',
       image: 'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=1200&q=80',
       link: '/contact',
     },
@@ -38,8 +38,8 @@ export class HomeServices {
       link: '/contact',
     },
     {
-      title: 'Stance Setup',
-      tag: 'Jant & Süspansiyon',
+      title: 'AdBlue Çözümleri',
+      tag: 'AdBlue',
       image: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=80',
       link: '/contact',
     },

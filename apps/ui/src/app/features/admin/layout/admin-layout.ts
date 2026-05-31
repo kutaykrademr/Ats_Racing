@@ -189,10 +189,11 @@ export class AdminLayout {
   protected readonly mobileOpen = signal(false);
 
   protected readonly navItems: NavItem[] = [
-    { label: 'Genel Bakış',  icon: 'pi-home',          route: '/admin/overview' },
-    { label: 'Kullanıcılar', icon: 'pi-users',          route: '/admin/users' },
-    { label: 'Siparişler',   icon: 'pi-shopping-cart',  route: '/admin/orders' },
-    { label: 'Ticketlar',    icon: 'pi-comments',       route: '/admin/tickets' },
+    { label: 'Genel Bakış',    icon: 'pi-home',          route: '/admin/overview' },
+    { label: 'Başvurular',     icon: 'pi-user-plus',     route: '/admin/registrations' },
+    { label: 'Kullanıcılar',   icon: 'pi-users',         route: '/admin/users' },
+    { label: 'Siparişler',     icon: 'pi-shopping-cart', route: '/admin/orders' },
+    { label: 'Ticketlar',      icon: 'pi-comments',      route: '/admin/tickets' },
   ];
 
   logout(): void {

@@ -1,6 +1,10 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type UserRole = 'admin' | 'dealer' | 'user';
+export type AccountType = 'user' | 'dealer';
 
 export interface AuthUser {
   id: string;
@@ -11,66 +15,91 @@ export interface AuthUser {
   avatar: string;
 }
 
-/* ── Static accounts ─────────────────────────────────────── */
-const STATIC_USERS: (AuthUser & { password: string })[] = [
-  {
-    id: 'u-admin',
-    name: 'Admin',
-    email: 'admin@atsracing.com',
-    password: 'admin123',
-    role: 'admin',
-    avatar: 'AD',
-  },
-  {
-    id: 'u-dealer',
-    name: 'Ahmet Yılmaz',
-    email: 'bayi@atsracing.com',
-    password: 'bayi123',
-    role: 'dealer',
-    company: 'ATS Bayi İstanbul',
-    avatar: 'AY',
-  },
-  {
-    id: 'u-user',
-    name: 'Ali Yıldız',
-    email: 'kullanici@atsracing.com',
-    password: 'user123',
-    role: 'user',
-    avatar: 'AY',
-  },
-];
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  fullName: string;
+  phone?: string;
+  accountType: AccountType;
+  dealershipName?: string;
+}
 
-const STORAGE_KEY = 'ats_auth_user';
+interface LoginResponse {
+  token: string;
+  refreshToken: string;
+  user: AuthUser;
+}
+
+const TOKEN_KEY = 'ats_access_token';
+const REFRESH_KEY = 'ats_refresh_token';
+const USER_KEY = 'ats_auth_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly _user = signal<AuthUser | null>(this._loadFromStorage());
+  private readonly http = inject(HttpClient);
+  private readonly api = environment.apiUrl;
+
+  private readonly _user = signal<AuthUser | null>(this.loadUser());
 
   readonly currentUser = this._user.asReadonly();
   readonly isLoggedIn  = computed(() => !!this._user());
   readonly isAdmin     = computed(() => this._user()?.role === 'admin');
   readonly isDealer    = computed(() => this._user()?.role === 'dealer');
 
-  login(email: string, password: string): AuthUser | null {
-    const found = STATIC_USERS.find(
-      u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+  get token(): string | null {
+    return localStorage.getItem(TOKEN_KEY);
+  }
+
+  /** Create a pending user/dealer account. Returns the server message. */
+  async register(payload: RegisterPayload): Promise<string> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string }>(`${this.api}/auth/register`, payload),
     );
-    if (!found) { return null; }
-    const { password: _pw, ...user } = found;
-    this._user.set(user);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-    return user;
+    return res.message;
+  }
+
+  /** Authenticate. Throws (with a friendly message) on failure. */
+  async login(email: string, password: string): Promise<AuthUser> {
+    const res = await firstValueFrom(
+      this.http.post<LoginResponse>(`${this.api}/auth/login`, { email, password }),
+    );
+    localStorage.setItem(TOKEN_KEY, res.token);
+    localStorage.setItem(REFRESH_KEY, res.refreshToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+    this._user.set(res.user);
+    return res.user;
+  }
+
+  /** Re-send the email verification link. */
+  async resendVerification(email: string): Promise<string> {
+    const res = await firstValueFrom(
+      this.http.post<{ message: string }>(`${this.api}/auth/resend-verification`, { email }),
+    );
+    return res.message;
   }
 
   logout(): void {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem(USER_KEY);
     this._user.set(null);
-    localStorage.removeItem(STORAGE_KEY);
   }
 
-  private _loadFromStorage(): AuthUser | null {
+  /** Pull a human-readable message out of an HttpErrorResponse. */
+  static messageFrom(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      const m = err.error?.message;
+      if (Array.isArray(m)) { return m[0] ?? 'İşlem başarısız.'; }
+      if (typeof m === 'string') { return m; }
+      if (err.status === 0) { return 'Sunucuya ulaşılamadı. Bağlantını kontrol et.'; }
+    }
+    return 'İşlem başarısız. Tekrar dene.';
+  }
+
+  private loadUser(): AuthUser | null {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      const raw = localStorage.getItem(USER_KEY);
+      return raw ? (JSON.parse(raw) as AuthUser) : null;
     } catch {
       return null;
     }

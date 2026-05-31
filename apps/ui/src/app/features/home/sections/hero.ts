@@ -23,7 +23,7 @@ export class HomeHero implements OnInit {
     {
       line1: 'Performans tutkunlarının',
       line2: "İstanbul'daki adresi",
-      lead: 'ECU yazılımı, performans modifiyesi ve profesyonel detaylı bakım — 12 yıllık deneyim, ölçülebilir sonuçlar.',
+      lead: 'Araçlarınızın performansını zirveye taşımak ve modül sistemlerinizde tam destek sağlamak için buradayız. ECU yazılımı ve modül çözümlerimizle aracınızın tüm potansiyelini ortaya çıkarın.',
       image: 'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=2400&q=80',
     },
     {

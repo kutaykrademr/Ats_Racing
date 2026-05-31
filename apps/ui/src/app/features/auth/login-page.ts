@@ -8,12 +8,12 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { AuthService } from '../../core/auth/auth.service';
+import { AuthService, AccountType } from '../../core/auth/auth.service';
 
 type AuthTab = 'login' | 'register';
 
@@ -41,8 +41,10 @@ export default class LoginPage {
   private readonly fb     = inject(FormBuilder);
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route  = inject(ActivatedRoute);
 
   protected readonly tab = signal<AuthTab>('login');
+  protected readonly accountType = signal<AccountType>('user');
 
   protected readonly loginForm = this.fb.nonNullable.group({
     email:    ['', [Validators.required, Validators.email]],
@@ -52,14 +54,37 @@ export default class LoginPage {
 
   protected readonly registerForm = this.fb.nonNullable.group(
     {
-      name:     ['', [Validators.required, Validators.minLength(2)]],
-      email:    ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirm:  ['', [Validators.required]],
-      terms:    new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.requiredTrue] }),
+      name:           ['', [Validators.required, Validators.minLength(2)]],
+      email:          ['', [Validators.required, Validators.email]],
+      phone:          [''],
+      dealershipName: [''],
+      password:       ['', [Validators.required, Validators.minLength(6)]],
+      confirm:        ['', [Validators.required]],
+      terms:          new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.requiredTrue] }),
     },
     { validators: passwordsMatch },
   );
+
+  constructor() {
+    // Returning from the email verification link → ?verified=1
+    if (this.route.snapshot.queryParamMap.get('verified') === '1') {
+      this.success.set(
+        'E-postan doğrulandı. Hesabın admin onayından geçince giriş yapabilirsin.',
+      );
+    }
+  }
+
+  protected setAccountType(t: AccountType): void {
+    this.accountType.set(t);
+    const dealership = this.registerForm.get('dealershipName');
+    if (t === 'dealer') {
+      dealership?.addValidators([Validators.required, Validators.minLength(2)]);
+    } else {
+      dealership?.clearValidators();
+      dealership?.setValue('');
+    }
+    dealership?.updateValueAndValidity();
+  }
 
   protected readonly form = computed<FormGroup>(() =>
     this.tab() === 'login' ? this.loginForm : this.registerForm,
@@ -105,23 +130,29 @@ export default class LoginPage {
 
     this.submitting.set(true);
     try {
-      await new Promise((r) => setTimeout(r, 500));
       if (this.tab() === 'login') {
         const { email, password } = this.loginForm.getRawValue();
-        const user = this.auth.login(email, password);
-        if (!user) {
-          this.serverError.set('E-posta veya şifre hatalı.');
-          return;
-        }
+        const user = await this.auth.login(email, password);
         const dest = user.role === 'admin' ? '/admin' : '/dashboard';
         this.router.navigate([dest]);
       } else {
-        this.success.set('Hesabın oluşturuldu. Giriş yapabilirsin.');
+        const v = this.registerForm.getRawValue();
+        const message = await this.auth.register({
+          email: v.email,
+          password: v.password,
+          fullName: v.name,
+          phone: v.phone?.trim() || undefined,
+          accountType: this.accountType(),
+          dealershipName:
+            this.accountType() === 'dealer' ? v.dealershipName?.trim() : undefined,
+        });
         this.registerForm.reset({ terms: false });
+        this.setAccountType('user');
         this.setTab('login');
+        this.success.set(message);
       }
-    } catch {
-      this.serverError.set('İşlem başarısız. Tekrar dene.');
+    } catch (err) {
+      this.serverError.set(AuthService.messageFrom(err));
     } finally {
       this.submitting.set(false);
     }
